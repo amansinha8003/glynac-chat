@@ -50,6 +50,23 @@ export const useChatStore = create<ChatState>()(
       deleteThread: (id: string) => {
         set((state) => {
           const filtered = state.threads.filter((t) => t.id !== id);
+          if (filtered.length === 0) {
+            const newId = nanoid();
+            const now = new Date().toISOString();
+            const newThread: Thread = {
+              id: newId,
+              title: 'New Compliance Thread',
+              pinned: false,
+              createdAt: now,
+              updatedAt: now,
+              messages: [],
+            };
+            return {
+              threads: [newThread],
+              activeThreadId: newId,
+            };
+          }
+
           let nextActiveId = state.activeThreadId;
           if (state.activeThreadId === id) {
             nextActiveId = filtered[0]?.id ?? null;
