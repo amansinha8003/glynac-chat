@@ -11,14 +11,48 @@ interface MessageFeedProps {
 }
 
 export function MessageFeed({ messages, threadId }: MessageFeedProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef<boolean>(true);
+
+  // Reset auto-scroll flag when switching threads
+  useEffect(() => {
+    shouldAutoScrollRef.current = true;
+    const el = containerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [threadId]);
+
+  // Handle user scroll detection
+  const handleScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    // Allow auto-scroll only if user is within 60px of the bottom
+    shouldAutoScrollRef.current = distanceFromBottom <= 60;
+  };
+
+  // Auto-scroll when messages length, last message content, or streaming state changes
+  const lastMessage = messages[messages.length - 1];
+  const lastMessageContent = lastMessage?.content;
+  const isStreaming = lastMessage?.isStreaming;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length, threadId]);
+    if (shouldAutoScrollRef.current) {
+      const el = containerRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    }
+  }, [messages.length, lastMessageContent, isStreaming]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      className="flex-1 overflow-y-auto px-4 py-6"
+    >
       <div className="mx-auto flex min-h-full max-w-3xl flex-col">
         {messages.length === 0 ? (
           <div className="my-auto flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50 duration-300">

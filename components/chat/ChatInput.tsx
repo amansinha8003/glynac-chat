@@ -2,20 +2,27 @@
 
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send } from 'lucide-react';
+import { Send, Square } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
+  onStopStreaming?: () => void;
+  isStreaming?: boolean;
   disabled?: boolean;
 }
 
-export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
+export function ChatInput({
+  onSendMessage,
+  onStopStreaming,
+  isStreaming = false,
+  disabled = false,
+}: ChatInputProps) {
   const [content, setContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
     const trimmed = content.trim();
-    if (!trimmed || disabled) return;
+    if (!trimmed || disabled || isStreaming) return;
 
     onSendMessage(trimmed);
     setContent('');
@@ -34,7 +41,6 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
-    // Auto-grow height up to max
     const target = e.target;
     target.style.height = 'auto';
     target.style.height = `${Math.min(target.scrollHeight, 180)}px`;
@@ -50,28 +56,47 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
             value={content}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            disabled={disabled}
-            placeholder="Ask about compliance policies, regulations, or draft a disclosure... (Enter to send)"
-            className="w-full resize-none bg-transparent px-4 pt-3.5 pb-12 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none dark:text-zinc-100 dark:placeholder-zinc-500 min-h-[54px] max-h-[180px] leading-relaxed"
+            disabled={disabled || isStreaming}
+            placeholder={
+              isStreaming
+                ? 'AI is generating compliance analysis...'
+                : 'Ask about compliance policies, regulations, or draft a disclosure... (Enter to send)'
+            }
+            className="w-full resize-none bg-transparent px-4 pt-3.5 pb-12 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none disabled:opacity-60 dark:text-zinc-100 dark:placeholder-zinc-500 min-h-[54px] max-h-[180px] leading-relaxed"
           />
 
           <div className="absolute right-2.5 bottom-2.5 flex items-center gap-2">
-            <span className="hidden text-[11px] text-zinc-400 sm:inline-flex items-center gap-1 mr-1">
-              <span>Press</span>
-              <kbd className="rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400">
-                ↵
-              </kbd>
-            </span>
-            <Button
-              type="button"
-              size="icon-sm"
-              disabled={!content.trim() || disabled}
-              onClick={handleSend}
-              className="h-8 w-8 rounded-xl bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-              aria-label="Send message"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+            {!isStreaming && (
+              <span className="hidden text-[11px] text-zinc-400 sm:inline-flex items-center gap-1 mr-1">
+                <span>Press</span>
+                <kbd className="rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400">
+                  ↵
+                </kbd>
+              </span>
+            )}
+
+            {isStreaming ? (
+              <Button
+                type="button"
+                size="icon-sm"
+                onClick={onStopStreaming}
+                className="h-8 w-8 rounded-xl bg-zinc-900 text-white shadow-2xs transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                aria-label="Stop generation"
+              >
+                <Square className="h-3 w-3 fill-current" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="icon-sm"
+                disabled={!content.trim() || disabled}
+                onClick={handleSend}
+                className="h-8 w-8 rounded-xl bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                aria-label="Send message"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
         <p className="mt-1.5 text-center text-[11px] text-zinc-400 dark:text-zinc-500">

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageFeed } from '@/components/chat/MessageFeed';
 import { ChatInput } from '@/components/chat/ChatInput';
+import { streamMockResponse } from '@/lib/streamMock';
+import { nanoid } from 'nanoid';
 
 const emptySubscribe = () => () => {};
 
@@ -13,10 +15,24 @@ export default function ChatPage() {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentStreamingRef = useRef<{ threadId: string; messageId: string } | null>(null);
 
   const threads = useChatStore((state) => state.threads);
   const activeThreadId = useChatStore((state) => state.activeThreadId);
   const addMessage = useChatStore((state) => state.addMessage);
+  const appendToMessage = useChatStore((state) => state.appendToMessage);
+  const updateMessage = useChatStore((state) => state.updateMessage);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   if (!mounted) {
     return (
@@ -31,22 +47,70 @@ export default function ChatPage() {
 
   const activeThread = threads.find((t) => t.id === activeThreadId) ?? threads[0];
 
-  const handleSendMessage = (content: string) => {
-    if (!activeThread) return;
+  const handleSendMessage = async (content: string) => {
+    if (!activeThread || isStreaming) return;
+
+    const threadId = activeThread.id;
+    const userMsgId = nanoid();
+    const assistantMsgId = nanoid();
 
     // 1. Add user message
-    addMessage(activeThread.id, {
+    addMessage(threadId, {
+      id: userMsgId,
       role: 'user',
       content,
     });
 
-    // 2. Add hardcoded assistant reply after 500ms
-    setTimeout(() => {
-      addMessage(activeThread.id, {
-        role: 'assistant',
-        content: `Under current regulatory guidance, communications and disclosures must be reviewed for accuracy, balanced risk portrayal, and supervisory approval.\n\n* **Status**: Preliminary review logged.\n* **Reference**: SEC Rule 206(4)-1 & FINRA Rule 2210.\n\nEnsure compliance retention in accordance with standard WORM archiving requirements [[cite:sec-17a-4]].`,
+    // 2. Add empty assistant message with isStreaming: true
+    addMessage(threadId, {
+      id: assistantMsgId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+    });
+
+    setIsStreaming(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    currentStreamingRef.current = { threadId, messageId: assistantMsgId };
+
+    try {
+      // Wait ~600ms showing thinking indicator with 3 animated dots
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      // Stream chunks into message using appendToMessage
+      await streamMockResponse({
+        prompt: content,
+        onChunk: (chunk) => {
+          appendToMessage(threadId, assistantMsgId, chunk);
+        },
+        signal: controller.signal,
       });
-    }, 500);
+    } catch {
+      // Handle abort or error gracefully
+    } finally {
+      updateMessage(threadId, assistantMsgId, { isStreaming: false });
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+      currentStreamingRef.current = null;
+    }
+  };
+
+  const handleStopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    if (currentStreamingRef.current) {
+      const { threadId, messageId } = currentStreamingRef.current;
+      updateMessage(threadId, messageId, { isStreaming: false });
+    }
+    setIsStreaming(false);
+    abortControllerRef.current = null;
+    currentStreamingRef.current = null;
   };
 
   return (
@@ -76,6 +140,8 @@ export default function ChatPage() {
         {/* Chat Input */}
         <ChatInput
           onSendMessage={handleSendMessage}
+          onStopStreaming={handleStopStreaming}
+          isStreaming={isStreaming}
           disabled={!activeThread}
         />
       </main>

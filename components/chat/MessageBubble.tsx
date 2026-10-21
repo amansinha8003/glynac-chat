@@ -25,7 +25,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           <div className="rounded-2xl rounded-tr-xs bg-emerald-600 px-4 py-2.5 text-sm text-white shadow-xs dark:bg-emerald-600 dark:text-white">
             <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
           </div>
-          <div className="hidden sm:flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+          <div className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 sm:flex dark:bg-emerald-950 dark:text-emerald-300">
             <User className="h-3.5 w-3.5" />
           </div>
         </div>
@@ -45,7 +45,23 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           <Bot className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1 rounded-2xl rounded-tl-xs border border-zinc-200/80 bg-white px-4 py-3 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
-          <MarkdownRenderer content={message.content} />
+          {message.isStreaming && !message.content ? (
+            <div className="flex items-center gap-1.5 py-1 px-0.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" />
+            </div>
+          ) : (
+            <div className="relative">
+              <MarkdownRenderer content={message.content} />
+              {message.isStreaming && (
+                <span
+                  className="inline-block h-3.5 w-1.5 translate-y-0.5 ml-1 rounded-2xs bg-emerald-500 animate-pulse align-middle"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
       {formattedTime && (
