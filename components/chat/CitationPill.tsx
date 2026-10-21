@@ -111,7 +111,7 @@ export function CitationPill({
         {/* Footer */}
         <div className="mt-1 flex items-center justify-between pt-1">
           <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
-            Verifiable source record
+            Illustrative excerpt · see source for full text
           </span>
           {citation.docUrl ? (
             <a
