@@ -2,8 +2,10 @@
 
 import { Message } from '@/types/chat';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { CitationPill } from './CitationPill';
+import { getUniqueCitations } from '@/lib/citations';
 import { format, isValid } from 'date-fns';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Bookmark } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: Message;
@@ -38,6 +40,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     );
   }
 
+  const uniqueCitations = !isUser && message.content ? getUniqueCitations(message.content) : [];
+
   return (
     <div className="flex w-full flex-col items-start transition-opacity animate-in fade-in-50 duration-200">
       <div className="flex max-w-[95%] items-start gap-2.5 sm:max-w-[90%] md:max-w-[85%]">
@@ -53,12 +57,31 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </div>
           ) : (
             <div className="relative">
-              <MarkdownRenderer content={message.content} />
+              <MarkdownRenderer content={message.content} isStreaming={message.isStreaming} />
               {message.isStreaming && (
                 <span
                   className="inline-block h-3.5 w-1.5 translate-y-0.5 ml-1 rounded-2xs bg-emerald-500 animate-pulse align-middle"
                   aria-hidden="true"
                 />
+              )}
+
+              {/* Sources footer for assistant messages */}
+              {uniqueCitations.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                    <Bookmark className="h-3 w-3 text-emerald-500" />
+                    <span>Sources ({uniqueCitations.length})</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {uniqueCitations.map((citation, idx) => (
+                      <CitationPill
+                        key={citation.id}
+                        citation={citation}
+                        numberBadge={idx + 1}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}

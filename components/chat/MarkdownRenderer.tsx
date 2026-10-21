@@ -4,14 +4,55 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
+import { CitationPill } from './CitationPill';
+import { cleanStreamingContent } from '@/lib/citations';
 import { cn } from '@/lib/utils';
 
 interface MarkdownRendererProps {
   content: string;
+  isStreaming?: boolean;
   className?: string;
 }
 
-export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+function renderTextWithCitations(text: string): React.ReactNode {
+  if (!text || typeof text !== 'string') return text;
+  if (!text.includes('[[cite:')) return text;
+
+  const parts = text.split(/(\[\[cite:[a-zA-Z0-9_-]+\]\])/g);
+  return parts.map((part, index) => {
+    const match = /^\[\[cite:([a-zA-Z0-9_-]+)\]\]$/.exec(part);
+    if (match) {
+      const citeId = match[1];
+      return <CitationPill key={`${citeId}-${index}`} citationId={citeId} />;
+    }
+    return part;
+  });
+}
+
+function processChildrenWithCitations(children: React.ReactNode): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (typeof child === 'string') {
+      return renderTextWithCitations(child);
+    }
+    if (React.isValidElement(child) && (child.props as { children?: React.ReactNode }).children) {
+      // Do not process code elements
+      if (child.type === 'code') {
+        return child;
+      }
+      const element = child as React.ReactElement<{ children?: React.ReactNode }>;
+      return React.cloneElement(
+        element,
+        undefined,
+        processChildrenWithCitations(element.props.children)
+      );
+    }
+    return child;
+  });
+}
+
+export function MarkdownRenderer({ content, isStreaming, className }: MarkdownRendererProps) {
+  const displayContent = cleanStreamingContent(content, isStreaming);
+
   return (
     <div className={cn('prose-sm max-w-none break-words text-sm leading-relaxed', className)}>
       <ReactMarkdown
@@ -73,14 +114,14 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           th({ children }) {
             return (
               <th className="px-3.5 py-2.5 text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {children}
+                {processChildrenWithCitations(children)}
               </th>
             );
           },
           td({ children }) {
             return (
               <td className="px-3.5 py-2.5 text-xs leading-relaxed text-zinc-700 dark:text-zinc-300">
-                {children}
+                {processChildrenWithCitations(children)}
               </td>
             );
           },
@@ -99,19 +140,19 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             );
           },
           li({ children }) {
-            return <li className="pl-0.5 leading-relaxed">{children}</li>;
+            return <li className="pl-0.5 leading-relaxed">{processChildrenWithCitations(children)}</li>;
           },
           strong({ children }) {
             return (
               <strong className="font-semibold text-zinc-950 dark:text-zinc-50">
-                {children}
+                {processChildrenWithCitations(children)}
               </strong>
             );
           },
           blockquote({ children }) {
             return (
-              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-emerald-500/5 py-1.5 pr-3 pl-3.5 text-xs italic text-zinc-600 dark:text-zinc-400">
-                {children}
+              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-emerald-50/5 py-1.5 pr-3 pl-3.5 text-xs italic text-zinc-600 dark:text-zinc-400">
+                {processChildrenWithCitations(children)}
               </blockquote>
             );
           },
@@ -130,28 +171,28 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           p({ children }) {
             return (
               <p className="my-2 leading-relaxed text-zinc-800 first:mt-0 last:mb-0 dark:text-zinc-200">
-                {children}
+                {processChildrenWithCitations(children)}
               </p>
             );
           },
           h1({ children }) {
             return (
               <h1 className="mt-4 mb-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {children}
+                {processChildrenWithCitations(children)}
               </h1>
             );
           },
           h2({ children }) {
             return (
               <h2 className="mt-3.5 mb-2 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {children}
+                {processChildrenWithCitations(children)}
               </h2>
             );
           },
           h3({ children }) {
             return (
               <h3 className="mt-3 mb-1.5 text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                {children}
+                {processChildrenWithCitations(children)}
               </h3>
             );
           },
@@ -160,7 +201,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           },
         }}
       >
-        {content}
+        {displayContent}
       </ReactMarkdown>
     </div>
   );

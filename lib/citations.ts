@@ -1,0 +1,42 @@
+import { Citation } from '@/types/chat';
+import { CITATIONS_BY_ID } from '@/data/mockCitations';
+
+export const CITE_REGEX = /\[\[cite:([a-zA-Z0-9_-]+)\]\]/g;
+export const PARTIAL_CITE_REGEX = /\[\[[a-zA-Z0-9_:-]*$/;
+
+export function getCitationById(id: string): Citation | null {
+  return CITATIONS_BY_ID[id] ?? null;
+}
+
+export function findCitationIds(text: string): string[] {
+  if (!text) return [];
+  const matches: string[] = [];
+  const regex = new RegExp(CITE_REGEX.source, 'g');
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(text)) !== null) {
+    matches.push(match[1]);
+  }
+  return matches;
+}
+
+export function getUniqueCitations(text: string): Citation[] {
+  if (!text) return [];
+  const ids = findCitationIds(text);
+  const uniqueIds = Array.from(new Set(ids));
+  return uniqueIds.map((id) => {
+    const existing = CITATIONS_BY_ID[id];
+    if (existing) return existing;
+    return {
+      id,
+      label: 'Unknown Source',
+      source: `Citation ID: ${id}`,
+      excerpt: 'No specific regulatory excerpt is currently registered for this citation identifier.',
+      docUrl: '',
+    };
+  });
+}
+
+export function cleanStreamingContent(content: string, isStreaming?: boolean): string {
+  if (!isStreaming || !content) return content;
+  return content.replace(PARTIAL_CITE_REGEX, '');
+}
