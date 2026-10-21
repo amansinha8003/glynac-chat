@@ -6,8 +6,9 @@ import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageFeed } from '@/components/chat/MessageFeed';
 import { ChatInput, ChatInputHandle } from '@/components/chat/ChatInput';
+import { QuickPrompts } from '@/components/chat/QuickPrompts';
 import { streamMockResponse } from '@/lib/streamMock';
-import { Attachment } from '@/types/chat';
+import { Attachment, Message } from '@/types/chat';
 import { nanoid } from 'nanoid';
 import { Upload } from 'lucide-react';
 
@@ -30,6 +31,9 @@ export default function ChatPage() {
   const addMessage = useChatStore((state) => state.addMessage);
   const appendToMessage = useChatStore((state) => state.appendToMessage);
   const updateMessage = useChatStore((state) => state.updateMessage);
+  const deleteMessage = useChatStore((state) => state.deleteMessage);
+  const updateMessageContent = useChatStore((state) => state.updateMessageContent);
+  const deleteMessagesAfter = useChatStore((state) => state.deleteMessagesAfter);
 
   useEffect(() => {
     return () => {
@@ -137,6 +141,115 @@ export default function ChatPage() {
     }
   };
 
+  const handleRegenerate = async () => {
+    if (!activeThread || isStreaming) return;
+
+    const messages = activeThread.messages;
+    const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant');
+    if (lastAssistantIndex === -1) return;
+
+    const lastAssistant = messages[lastAssistantIndex];
+
+    // Find the closest preceding user message
+    let precedingUser: Message | undefined;
+    for (let i = lastAssistantIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        precedingUser = messages[i];
+        break;
+      }
+    }
+
+    if (!precedingUser) return;
+
+    // Delete the last assistant message
+    const threadId = activeThread.id;
+    deleteMessage(threadId, lastAssistant.id);
+
+    // Stream a new reply
+    const newAssistantMsgId = nanoid();
+    addMessage(threadId, {
+      id: newAssistantMsgId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+    });
+
+    setIsStreaming(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    currentStreamingRef.current = { threadId, messageId: newAssistantMsgId };
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      if (controller.signal.aborted) return;
+
+      await streamMockResponse({
+        prompt: precedingUser.content,
+        attachments: precedingUser.attachments,
+        onChunk: (chunk) => {
+          appendToMessage(threadId, newAssistantMsgId, chunk);
+        },
+        signal: controller.signal,
+      });
+    } catch {
+      // Abort
+    } finally {
+      updateMessage(threadId, newAssistantMsgId, { isStreaming: false });
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+      currentStreamingRef.current = null;
+    }
+  };
+
+  const handleEditSave = async (messageId: string, newContent: string) => {
+    if (!activeThread || isStreaming) return;
+
+    const threadId = activeThread.id;
+    const targetMessage = activeThread.messages.find((m) => m.id === messageId);
+    const attachments = targetMessage?.attachments;
+
+    // 1. Update user message content
+    updateMessageContent(threadId, messageId, newContent);
+
+    // 2. Delete every message after it in the thread
+    deleteMessagesAfter(threadId, messageId);
+
+    // 3. Stream a new assistant reply
+    const newAssistantMsgId = nanoid();
+    addMessage(threadId, {
+      id: newAssistantMsgId,
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+    });
+
+    setIsStreaming(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    currentStreamingRef.current = { threadId, messageId: newAssistantMsgId };
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      if (controller.signal.aborted) return;
+
+      await streamMockResponse({
+        prompt: newContent,
+        attachments,
+        onChunk: (chunk) => {
+          appendToMessage(threadId, newAssistantMsgId, chunk);
+        },
+        signal: controller.signal,
+      });
+    } catch {
+      // Abort
+    } finally {
+      updateMessage(threadId, newAssistantMsgId, { isStreaming: false });
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+      currentStreamingRef.current = null;
+    }
+  };
+
   const handleStopStreaming = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -149,6 +262,12 @@ export default function ChatPage() {
     abortControllerRef.current = null;
     currentStreamingRef.current = null;
   };
+
+  const messages = activeThread?.messages ?? [];
+  const hasMessages = messages.length > 0;
+  const lastMessage = messages[messages.length - 1];
+  const showInlinePrompts =
+    hasMessages && !isStreaming && lastMessage?.role === 'assistant';
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
@@ -189,9 +308,25 @@ export default function ChatPage() {
 
         {/* Message Feed */}
         <MessageFeed
-          messages={activeThread?.messages ?? []}
+          messages={messages}
           threadId={activeThread?.id}
+          isStreaming={isStreaming}
+          onSelectQuickPrompt={(prompt) => handleSendMessage(prompt)}
+          onRegenerate={handleRegenerate}
+          onEditSave={handleEditSave}
         />
+
+        {/* Suggested Quick Prompts (above input after assistant finishes) */}
+        {showInlinePrompts && (
+          <div className="w-full border-t border-zinc-200/50 bg-white/60 px-4 py-1 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-950/60">
+            <div className="mx-auto max-w-3xl">
+              <QuickPrompts
+                onSelectPrompt={(prompt) => handleSendMessage(prompt)}
+                variant="inline"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Chat Input */}
         <ChatInput

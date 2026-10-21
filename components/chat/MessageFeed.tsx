@@ -3,14 +3,26 @@
 import { useEffect, useRef } from 'react';
 import { Message } from '@/types/chat';
 import { MessageBubble } from './MessageBubble';
+import { QuickPrompts } from './QuickPrompts';
 import { MessageSquarePlus } from 'lucide-react';
 
 interface MessageFeedProps {
   messages: Message[];
   threadId?: string;
+  isStreaming?: boolean;
+  onSelectQuickPrompt?: (prompt: string) => void;
+  onRegenerate?: () => void;
+  onEditSave?: (messageId: string, newContent: string) => void;
 }
 
-export function MessageFeed({ messages, threadId }: MessageFeedProps) {
+export function MessageFeed({
+  messages,
+  threadId,
+  isStreaming = false,
+  onSelectQuickPrompt,
+  onRegenerate,
+  onEditSave,
+}: MessageFeedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef<boolean>(true);
@@ -36,7 +48,6 @@ export function MessageFeed({ messages, threadId }: MessageFeedProps) {
   // Auto-scroll when messages length, last message content, or streaming state changes
   const lastMessage = messages[messages.length - 1];
   const lastMessageContent = lastMessage?.content;
-  const isStreaming = lastMessage?.isStreaming;
 
   useEffect(() => {
     if (shouldAutoScrollRef.current) {
@@ -46,6 +57,8 @@ export function MessageFeed({ messages, threadId }: MessageFeedProps) {
       }
     }
   }, [messages.length, lastMessageContent, isStreaming]);
+
+  const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant');
 
   return (
     <div
@@ -65,11 +78,23 @@ export function MessageFeed({ messages, threadId }: MessageFeedProps) {
             <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
               Query regulatory requirements, evaluate communications for SEC & FINRA compliance, or test disclosures.
             </p>
+
+            {onSelectQuickPrompt && (
+              <QuickPrompts onSelectPrompt={onSelectQuickPrompt} variant="empty" />
+            )}
           </div>
         ) : (
           <div className="space-y-6">
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+            {messages.map((message, index) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                threadId={threadId}
+                isLastAssistantMessage={index === lastAssistantIndex}
+                isStreaming={isStreaming}
+                onRegenerate={onRegenerate}
+                onEditSave={onEditSave}
+              />
             ))}
             <div ref={bottomRef} className="h-px w-full" aria-hidden="true" />
           </div>

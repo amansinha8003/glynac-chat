@@ -19,6 +19,9 @@ export interface ChatState {
   updateMessage: (threadId: string, messageId: string, patch: Partial<Message>) => void;
   appendToMessage: (threadId: string, messageId: string, delta: string) => void;
   deleteMessage: (threadId: string, messageId: string) => void;
+  setFeedback: (threadId: string, messageId: string, feedback: 'up' | 'down') => void;
+  deleteMessagesAfter: (threadId: string, messageId: string) => void;
+  updateMessageContent: (threadId: string, messageId: string, content: string) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -171,6 +174,52 @@ export const useChatStore = create<ChatState>()(
               ...t,
               updatedAt: new Date().toISOString(),
               messages: t.messages.filter((m) => m.id !== messageId),
+            };
+          }),
+        }));
+      },
+
+      setFeedback: (threadId: string, messageId: string, feedback: 'up' | 'down') => {
+        set((state) => ({
+          threads: state.threads.map((t) => {
+            if (t.id !== threadId) return t;
+            return {
+              ...t,
+              messages: t.messages.map((m) => {
+                if (m.id !== messageId) return m;
+                const newFeedback = m.feedback === feedback ? undefined : feedback;
+                return { ...m, feedback: newFeedback };
+              }),
+            };
+          }),
+        }));
+      },
+
+      deleteMessagesAfter: (threadId: string, messageId: string) => {
+        set((state) => ({
+          threads: state.threads.map((t) => {
+            if (t.id !== threadId) return t;
+            const index = t.messages.findIndex((m) => m.id === messageId);
+            if (index === -1) return t;
+            return {
+              ...t,
+              updatedAt: new Date().toISOString(),
+              messages: t.messages.slice(0, index + 1),
+            };
+          }),
+        }));
+      },
+
+      updateMessageContent: (threadId: string, messageId: string, content: string) => {
+        set((state) => ({
+          threads: state.threads.map((t) => {
+            if (t.id !== threadId) return t;
+            return {
+              ...t,
+              updatedAt: new Date().toISOString(),
+              messages: t.messages.map((m) =>
+                m.id === messageId ? { ...m, content } : m
+              ),
             };
           }),
         }));

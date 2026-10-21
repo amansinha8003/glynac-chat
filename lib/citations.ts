@@ -41,3 +41,12 @@ export function cleanStreamingContent(content: string, isStreaming?: boolean): s
   if (!isStreaming || !content) return content;
   return content.replace(PARTIAL_CITE_REGEX, '');
 }
+
+export function formatContentForCopy(content: string): string {
+  if (!content) return '';
+  return content.replace(CITE_REGEX, (_match, id) => {
+    const citation = getCitationById(id);
+    return citation ? `[${citation.label}]` : `[${id}]`;
+  });
+}
+
