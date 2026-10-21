@@ -236,64 +236,100 @@ Here are three compliance questions you can ask me:
 * **Suitability & Reg BI**: "How do Reg BI conflicts of interest differ from FINRA Rule 2111?"`;
 }
 
-function getResponseForPrompt(prompt: string): string {
+function getDocumentReviewResponse(attachments: Attachment[]): string {
+  const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
+
+  return `I reviewed the attached document(s): ${fileList}.
+
+### Compliance Audit Summary
+
+| Section | Finding | Risk Level |
+| :--- | :--- | :--- |
+| **Performance Claims** | Past performance references lack required net-of-fees metrics [[cite:sec-206-4-1]] | **High** |
+| **Missing Disclosures** | Key promotional statements lack prominent risk disclosures adjacent to text [[cite:finra-2210-d]] | **High** |
+| **Testimonial Language** | Third-party endorsements require explicit disclosure of material compensation [[cite:sec-206-4-1]] | **Medium** |
+| **Record Retention** | External communication artifacts must be archived in immutable storage [[cite:sec-17a-4]] | **Medium** |
+
+### Recommended Actions
+* **Revise Disclosures**: Insert clear and prominent risk disclosures directly adjacent to all performance metrics and testimonials.
+* **Supervisory Pre-Approval**: Submit the revised document to a Series 24 registered principal for written approval before client dissemination [[cite:finra-3110]].
+* **Archive Audit Records**: Store the original submission, marked-up changes, and approval logs in an immutable WORM-compliant system [[cite:sec-17a-4]].`;
+}
+
+function prependAttachments(baseResponse: string, attachments?: Attachment[]): string {
+  if (!attachments || attachments.length === 0) return baseResponse;
+  const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
+  return `I reviewed the attached document(s): ${fileList}.\n\n${baseResponse}`;
+}
+
+function getResponseForPrompt(prompt: string, attachments?: Attachment[]): string {
   const trimmed = prompt.trim();
   const lower = trimmed.toLowerCase();
 
-  // 1. Generic greetings
-  if (/^(hi|hello|hey|greetings|good morning|good afternoon|good evening|howdy)([\s!.,?]|$)/i.test(trimmed)) {
+  // 1. Generic greetings (only if no attachments)
+  if (
+    (!attachments || attachments.length === 0) &&
+    /^(hi|hello|hey|greetings|good morning|good afternoon|good evening|howdy)([\s!.,?]|$)/i.test(
+      trimmed
+    )
+  ) {
     return GREETING_RESPONSE;
   }
 
   // 2. Guaranteed
   if (lower.includes('guaranteed')) {
-    return GUARANTEED_RESPONSE;
+    return prependAttachments(GUARANTEED_RESPONSE, attachments);
   }
 
   // 3. Advertising, Social Media, Testimonials
   if (lower.includes('advertis') || lower.includes('social media') || lower.includes('testimonial')) {
-    return ADVERTISING_RESPONSE;
+    return prependAttachments(ADVERTISING_RESPONSE, attachments);
   }
 
   // 4. Retention, WhatsApp, Off-channel
   if (lower.includes('retention') || lower.includes('whatsapp') || lower.includes('off-channel')) {
-    return RETENTION_RESPONSE;
+    return prependAttachments(RETENTION_RESPONSE, attachments);
   }
 
   // 5. Disclosure
   if (lower.includes('disclosure')) {
-    return DISCLOSURE_RESPONSE;
+    return prependAttachments(DISCLOSURE_RESPONSE, attachments);
   }
 
   // 6. KYC, AML
   if (/\bkyc\b/i.test(trimmed) || /\baml\b/i.test(trimmed) || lower.includes('anti-money laundering')) {
-    return AML_RESPONSE;
+    return prependAttachments(AML_RESPONSE, attachments);
   }
 
   // 7. Reg BI
   if (lower.includes('reg bi') || lower.includes('regulation best interest')) {
-    return REGBI_RESPONSE;
+    return prependAttachments(REGBI_RESPONSE, attachments);
   }
 
   // 8. Performance
   if (lower.includes('performance')) {
-    return PERFORMANCE_RESPONSE;
+    return prependAttachments(PERFORMANCE_RESPONSE, attachments);
   }
 
   // 9. Suitability
   if (lower.includes('suitability')) {
-    return SUITABILITY_RESPONSE;
+    return prependAttachments(SUITABILITY_RESPONSE, attachments);
   }
 
   // 10. General FINRA / SEC mentions
   if (lower.includes('finra')) {
-    return GUARANTEED_RESPONSE;
+    return prependAttachments(GUARANTEED_RESPONSE, attachments);
   }
   if (lower.includes('sec')) {
-    return ADVERTISING_RESPONSE;
+    return prependAttachments(ADVERTISING_RESPONSE, attachments);
   }
 
-  // 11. Polite fallback with restated question and no citation
+  // 11. If attachments exist and no specific keyword matched -> return Document Review answer!
+  if (attachments && attachments.length > 0) {
+    return getDocumentReviewResponse(attachments);
+  }
+
+  // 12. Fallback for prompts with no keyword and no attachments
   return getFallbackResponse(prompt);
 }
 
@@ -303,14 +339,7 @@ export async function streamMockResponse({
   onChunk,
   signal,
 }: StreamOptions): Promise<void> {
-  let fullText = getResponseForPrompt(prompt);
-
-  if (attachments && attachments.length > 0) {
-    const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
-    const prefix = `I reviewed the attached document(s): ${fileList}.\n\n`;
-    fullText = prefix + fullText;
-  }
-
+  const fullText = getResponseForPrompt(prompt, attachments);
   let i = 0;
 
   while (i < fullText.length) {

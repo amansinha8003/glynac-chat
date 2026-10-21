@@ -5,6 +5,7 @@ export const CITE_REGEX = /\[\[cite:([a-zA-Z0-9_-]+)\]\]/g;
 export const PARTIAL_CITE_REGEX = /\[\[[a-zA-Z0-9_:-]*$/;
 
 export function getCitationById(id: string): Citation | null {
+  if (id === 'finra-2210-d') return CITATIONS_BY_ID['finra-2210-s4'] ?? null;
   return CITATIONS_BY_ID[id] ?? null;
 }
 
@@ -24,7 +25,7 @@ export function getUniqueCitations(text: string): Citation[] {
   const ids = findCitationIds(text);
   const uniqueIds = Array.from(new Set(ids));
   return uniqueIds.map((id) => {
-    const existing = CITATIONS_BY_ID[id];
+    const existing = getCitationById(id);
     if (existing) return existing;
     return {
       id,
