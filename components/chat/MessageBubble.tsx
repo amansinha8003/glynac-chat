@@ -3,6 +3,7 @@
 import { Message } from '@/types/chat';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { CitationPill } from './CitationPill';
+import { AttachmentChip } from './AttachmentChip';
 import { getUniqueCitations } from '@/lib/citations';
 import { format, isValid } from 'date-fns';
 import { Bot, User, Bookmark } from 'lucide-react';
@@ -25,6 +26,18 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="flex w-full flex-col items-end transition-opacity animate-in fade-in-50 duration-200">
         <div className="flex max-w-[85%] items-end gap-2 sm:max-w-[75%]">
           <div className="rounded-2xl rounded-tr-xs bg-emerald-600 px-4 py-2.5 text-sm text-white shadow-xs dark:bg-emerald-600 dark:text-white">
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5 justify-start">
+                {message.attachments.map((att) => (
+                  <AttachmentChip
+                    key={att.id}
+                    attachment={att}
+                    readOnly
+                    className="bg-white/15 border-white/20 text-white dark:bg-white/10 dark:border-white/15 dark:text-white"
+                  />
+                ))}
+              </div>
+            )}
             <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
           </div>
           <div className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 sm:flex dark:bg-emerald-950 dark:text-emerald-300">

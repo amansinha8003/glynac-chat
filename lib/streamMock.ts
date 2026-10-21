@@ -1,5 +1,8 @@
+import { Attachment } from '@/types/chat';
+
 export interface StreamOptions {
   prompt: string;
+  attachments?: Attachment[];
   onChunk: (chunk: string) => void;
   signal?: AbortSignal;
 }
@@ -294,8 +297,20 @@ function getResponseForPrompt(prompt: string): string {
   return getFallbackResponse(prompt);
 }
 
-export async function streamMockResponse({ prompt, onChunk, signal }: StreamOptions): Promise<void> {
-  const fullText = getResponseForPrompt(prompt);
+export async function streamMockResponse({
+  prompt,
+  attachments,
+  onChunk,
+  signal,
+}: StreamOptions): Promise<void> {
+  let fullText = getResponseForPrompt(prompt);
+
+  if (attachments && attachments.length > 0) {
+    const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
+    const prefix = `I reviewed the attached document(s): ${fileList}.\n\n`;
+    fullText = prefix + fullText;
+  }
+
   let i = 0;
 
   while (i < fullText.length) {
