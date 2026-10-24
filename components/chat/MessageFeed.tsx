@@ -4,12 +4,17 @@ import { useEffect, useRef } from 'react';
 import { Message } from '@/types/chat';
 import { MessageBubble } from './MessageBubble';
 import { QuickPrompts } from './QuickPrompts';
+import { SearchMatch } from '@/lib/searchMessages';
 import { MessageSquarePlus } from 'lucide-react';
 
 interface MessageFeedProps {
   messages: Message[];
   threadId?: string;
   isStreaming?: boolean;
+  searchQuery?: string;
+  activeMatchIndex?: number;
+  matches?: SearchMatch[];
+  isSearchOpen?: boolean;
   onSelectQuickPrompt?: (prompt: string) => void;
   onRegenerate?: () => void;
   onEditSave?: (messageId: string, newContent: string) => void;
@@ -19,6 +24,10 @@ export function MessageFeed({
   messages,
   threadId,
   isStreaming = false,
+  searchQuery,
+  activeMatchIndex,
+  matches = [],
+  isSearchOpen = false,
   onSelectQuickPrompt,
   onRegenerate,
   onEditSave,
@@ -48,15 +57,30 @@ export function MessageFeed({
   // Auto-scroll when messages length, last message content, or streaming state changes
   const lastMessage = messages[messages.length - 1];
   const lastMessageContent = lastMessage?.content;
+  const totalMatches = matches.length;
 
   useEffect(() => {
     if (shouldAutoScrollRef.current) {
+      // Pause auto-scroll-to-bottom while streaming when search is open and match is active
+      if (isSearchOpen && totalMatches > 0) {
+        return;
+      }
       const el = containerRef.current;
       if (el) {
         el.scrollTop = el.scrollHeight;
       }
     }
-  }, [messages.length, lastMessageContent, isStreaming]);
+  }, [messages.length, lastMessageContent, isStreaming, isSearchOpen, totalMatches]);
+
+  // Smoothly scroll active search match into view (centered)
+  useEffect(() => {
+    if (isSearchOpen && totalMatches > 0 && activeMatchIndex !== undefined) {
+      const el = document.getElementById(`search-match-${activeMatchIndex}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [isSearchOpen, activeMatchIndex, totalMatches]);
 
   const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant');
 
@@ -85,17 +109,30 @@ export function MessageFeed({
           </div>
         ) : (
           <div className="space-y-6">
-            {messages.map((message, index) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                threadId={threadId}
-                isLastAssistantMessage={index === lastAssistantIndex}
-                isStreaming={isStreaming}
-                onRegenerate={onRegenerate}
-                onEditSave={onEditSave}
-              />
-            ))}
+            {messages.map((message, index) => {
+              const contentMatches = matches.filter(
+                (m) => m.messageId === message.id && m.type === 'content'
+              );
+              const attachmentMatches = matches.filter(
+                (m) => m.messageId === message.id && m.type === 'attachment'
+              );
+
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  threadId={threadId}
+                  isLastAssistantMessage={index === lastAssistantIndex}
+                  isStreaming={isStreaming}
+                  searchQuery={searchQuery}
+                  activeMatchIndex={activeMatchIndex}
+                  contentMatches={contentMatches}
+                  attachmentMatches={attachmentMatches}
+                  onRegenerate={onRegenerate}
+                  onEditSave={onEditSave}
+                />
+              );
+            })}
             <div ref={bottomRef} className="h-px w-full" aria-hidden="true" />
           </div>
         )}

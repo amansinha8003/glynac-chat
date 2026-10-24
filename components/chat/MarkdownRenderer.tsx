@@ -6,52 +6,101 @@ import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
 import { CitationPill } from './CitationPill';
 import { cleanStreamingContent } from '@/lib/citations';
+import { escapeRegExp } from '@/lib/searchMessages';
 import { cn } from '@/lib/utils';
 
 interface MarkdownRendererProps {
   content: string;
   isStreaming?: boolean;
   className?: string;
+  searchQuery?: string;
+  activeMatchIndex?: number;
+  getContentMatchIndex?: () => number;
 }
 
-function renderTextWithCitations(text: string): React.ReactNode {
-  if (!text || typeof text !== 'string') return text;
-  if (!text.includes('[[cite:')) return text;
-
-  const parts = text.split(/(\[\[cite:[a-zA-Z0-9_-]+\]\])/g);
-  return parts.map((part, index) => {
-    const match = /^\[\[cite:([a-zA-Z0-9_-]+)\]\]$/.exec(part);
-    if (match) {
-      const citeId = match[1];
-      return <CitationPill key={`${citeId}-${index}`} citationId={citeId} />;
-    }
-    return part;
-  });
-}
-
-function processChildrenWithCitations(children: React.ReactNode): React.ReactNode {
-  return React.Children.map(children, (child) => {
-    if (typeof child === 'string') {
-      return renderTextWithCitations(child);
-    }
-    if (React.isValidElement(child) && (child.props as { children?: React.ReactNode }).children) {
-      // Do not process code elements
-      if (child.type === 'code') {
-        return child;
-      }
-      const element = child as React.ReactElement<{ children?: React.ReactNode }>;
-      return React.cloneElement(
-        element,
-        undefined,
-        processChildrenWithCitations(element.props.children)
-      );
-    }
-    return child;
-  });
-}
-
-export function MarkdownRenderer({ content, isStreaming, className }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  isStreaming,
+  className,
+  searchQuery,
+  activeMatchIndex,
+  getContentMatchIndex,
+}: MarkdownRendererProps) {
   const displayContent = cleanStreamingContent(content, isStreaming);
+
+  const trimmedQuery = searchQuery?.trim();
+  const queryRegex = trimmedQuery
+    ? new RegExp(`(${escapeRegExp(trimmedQuery)})`, 'gi')
+    : null;
+
+  function renderTextWithHighlightAndCitations(text: string): React.ReactNode {
+    if (!text || typeof text !== 'string') return text;
+
+    // First split by citation tokens
+    if (text.includes('[[cite:')) {
+      const parts = text.split(/(\[\[cite:[a-zA-Z0-9_-]+\]\])/g);
+      return parts.map((part, index) => {
+        const match = /^\[\[cite:([a-zA-Z0-9_-]+)\]\]$/.exec(part);
+        if (match) {
+          const citeId = match[1];
+          return <CitationPill key={`${citeId}-${index}`} citationId={citeId} />;
+        }
+        return renderHighlightedSubstrings(part, index);
+      });
+    }
+
+    return renderHighlightedSubstrings(text, 0);
+  }
+
+  function renderHighlightedSubstrings(str: string, baseIndex: number): React.ReactNode {
+    if (!queryRegex || !getContentMatchIndex || !str.toLowerCase().includes(trimmedQuery!.toLowerCase())) {
+      return str;
+    }
+
+    const segments = str.split(queryRegex);
+    return segments.map((seg, i) => {
+      if (seg.toLowerCase() === trimmedQuery!.toLowerCase()) {
+        const matchIdx = getContentMatchIndex();
+        const isActive = matchIdx === activeMatchIndex;
+        return (
+          <mark
+            key={`highlight-${baseIndex}-${i}-${matchIdx}`}
+            id={`search-match-${matchIdx}`}
+            data-search-match-index={matchIdx}
+            className={cn(
+              'rounded-2xs px-0.5 transition-colors',
+              isActive
+                ? 'bg-amber-400 text-zinc-950 font-semibold ring-2 ring-amber-500/80 dark:bg-amber-400 dark:text-zinc-950'
+                : 'bg-yellow-200/80 text-zinc-900 dark:bg-amber-500/30 dark:text-amber-200'
+            )}
+          >
+            {seg}
+          </mark>
+        );
+      }
+      return seg;
+    });
+  }
+
+  function processChildrenWithCitations(children: React.ReactNode): React.ReactNode {
+    return React.Children.map(children, (child) => {
+      if (typeof child === 'string') {
+        return renderTextWithHighlightAndCitations(child);
+      }
+      if (React.isValidElement(child) && (child.props as { children?: React.ReactNode }).children) {
+        if (child.type === 'code') {
+          return child;
+        }
+        const element = child as React.ReactElement<{ children?: React.ReactNode }>;
+        return React.cloneElement(
+          element,
+          undefined,
+          processChildrenWithCitations(element.props.children)
+        );
+      }
+      return child;
+    });
+  }
 
   return (
     <div className={cn('prose-sm max-w-none break-words text-sm leading-relaxed', className)}>
@@ -68,6 +117,9 @@ export function MarkdownRenderer({ content, isStreaming, className }: MarkdownRe
                 <CodeBlock
                   language={match ? match[1] : ''}
                   value={stringChildren.replace(/\n$/, '')}
+                  searchQuery={searchQuery}
+                  activeMatchIndex={activeMatchIndex}
+                  getCodeMatchIndex={getContentMatchIndex}
                 />
               );
             }
@@ -77,7 +129,7 @@ export function MarkdownRenderer({ content, isStreaming, className }: MarkdownRe
                 className="rounded-md border border-zinc-200/70 bg-zinc-100 px-1.5 py-0.5 font-mono text-[12.5px] font-medium text-emerald-700 dark:border-zinc-800 dark:bg-zinc-800/80 dark:text-emerald-400"
                 {...props}
               >
-                {children}
+                {processChildrenWithCitations(children)}
               </code>
             );
           },

@@ -9,6 +9,7 @@ import {
   File,
   X,
 } from 'lucide-react';
+import { escapeRegExp } from '@/lib/searchMessages';
 import { cn } from '@/lib/utils';
 
 interface AttachmentChipProps {
@@ -16,6 +17,9 @@ interface AttachmentChipProps {
   onRemove?: (id: string) => void;
   readOnly?: boolean;
   className?: string;
+  searchQuery?: string;
+  activeMatchIndex?: number;
+  getAttachmentMatchIndex?: () => number;
 }
 
 export function formatFileSize(bytes: number): string {
@@ -50,7 +54,43 @@ export function AttachmentChip({
   onRemove,
   readOnly = false,
   className,
+  searchQuery,
+  activeMatchIndex,
+  getAttachmentMatchIndex,
 }: AttachmentChipProps) {
+  const renderName = () => {
+    const trimmed = searchQuery?.trim();
+    if (!trimmed || !getAttachmentMatchIndex || !attachment.name.toLowerCase().includes(trimmed.toLowerCase())) {
+      return attachment.name;
+    }
+
+    const regex = new RegExp(`(${escapeRegExp(trimmed)})`, 'gi');
+    const parts = attachment.name.split(regex);
+
+    return parts.map((part, index) => {
+      if (part.toLowerCase() === trimmed.toLowerCase()) {
+        const matchIdx = getAttachmentMatchIndex();
+        const isActive = matchIdx === activeMatchIndex;
+        return (
+          <mark
+            key={index}
+            id={`search-match-${matchIdx}`}
+            data-search-match-index={matchIdx}
+            className={cn(
+              'rounded-2xs px-0.5 transition-colors',
+              isActive
+                ? 'bg-amber-400 text-zinc-950 font-semibold ring-2 ring-amber-500/80 dark:bg-amber-400 dark:text-zinc-950'
+                : 'bg-yellow-200/80 text-zinc-900 dark:bg-amber-500/30 dark:text-amber-200'
+            )}
+          >
+            {part}
+          </mark>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -67,7 +107,7 @@ export function AttachmentChip({
         title={attachment.name}
         className="max-w-[130px] truncate font-medium text-xs sm:max-w-[180px]"
       >
-        {attachment.name}
+        {renderName()}
       </span>
 
       <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">

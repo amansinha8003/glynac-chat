@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect, useSyncExternalStore, DragEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, useSyncExternalStore, DragEvent } from 'react';
 import { useChatStore } from '@/store/chatStore';
+import { useSearchStore } from '@/store/searchStore';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatHeader } from '@/components/chat/ChatHeader';
+import { MessageSearch } from '@/components/chat/MessageSearch';
 import { MessageFeed } from '@/components/chat/MessageFeed';
 import { ChatInput, ChatInputHandle } from '@/components/chat/ChatInput';
 import { QuickPrompts } from '@/components/chat/QuickPrompts';
 import { streamMockResponse } from '@/lib/streamMock';
+import { searchMessages } from '@/lib/searchMessages';
 import { Attachment, Message } from '@/types/chat';
 import { nanoid } from 'nanoid';
 import { Upload } from 'lucide-react';
@@ -35,6 +38,15 @@ export default function ChatPage() {
   const updateMessageContent = useChatStore((state) => state.updateMessageContent);
   const deleteMessagesAfter = useChatStore((state) => state.deleteMessagesAfter);
 
+  const {
+    debouncedQuery,
+    activeIndex,
+    isOpen: isSearchOpen,
+    openSearch,
+    resetSearch,
+    setTotalMatches,
+  } = useSearchStore();
+
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
@@ -42,6 +54,36 @@ export default function ChatPage() {
       }
     };
   }, []);
+
+  // Reset search state when active thread changes
+  useEffect(() => {
+    resetSearch();
+  }, [activeThreadId, resetSearch]);
+
+  // Global Ctrl/Cmd + F shortcut to toggle message search
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        openSearch();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openSearch]);
+
+  const activeThread = threads.find((t) => t.id === activeThreadId) ?? threads[0];
+  const messages = activeThread?.messages ?? [];
+
+  // Compute search matches dynamically over messages and attachments
+  const searchMatches = useMemo(() => {
+    return searchMessages(messages, debouncedQuery);
+  }, [messages, debouncedQuery]);
+
+  // Update total matches in search store
+  useEffect(() => {
+    setTotalMatches(searchMatches.length);
+  }, [searchMatches.length, setTotalMatches]);
 
   if (!mounted) {
     return (
@@ -53,8 +95,6 @@ export default function ChatPage() {
       </div>
     );
   }
-
-  const activeThread = threads.find((t) => t.id === activeThreadId) ?? threads[0];
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -115,14 +155,12 @@ export default function ChatPage() {
     currentStreamingRef.current = { threadId, messageId: assistantMsgId };
 
     try {
-      // Wait ~600ms showing thinking indicator with 3 animated dots
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       if (controller.signal.aborted) {
         return;
       }
 
-      // Stream chunks into message using appendToMessage
       await streamMockResponse({
         prompt: content,
         attachments,
@@ -132,7 +170,7 @@ export default function ChatPage() {
         signal: controller.signal,
       });
     } catch {
-      // Handle abort or error gracefully
+      // Abort
     } finally {
       updateMessage(threadId, assistantMsgId, { isStreaming: false });
       setIsStreaming(false);
@@ -144,13 +182,12 @@ export default function ChatPage() {
   const handleRegenerate = async () => {
     if (!activeThread || isStreaming) return;
 
-    const messages = activeThread.messages;
     const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant');
     if (lastAssistantIndex === -1) return;
 
     const lastAssistant = messages[lastAssistantIndex];
 
-    // Find the closest preceding user message
+    // Find closest preceding user message
     let precedingUser: Message | undefined;
     for (let i = lastAssistantIndex - 1; i >= 0; i--) {
       if (messages[i].role === 'user') {
@@ -161,7 +198,7 @@ export default function ChatPage() {
 
     if (!precedingUser) return;
 
-    // Delete the last assistant message
+    // Delete last assistant message
     const threadId = activeThread.id;
     deleteMessage(threadId, lastAssistant.id);
 
@@ -205,7 +242,7 @@ export default function ChatPage() {
     if (!activeThread || isStreaming) return;
 
     const threadId = activeThread.id;
-    const targetMessage = activeThread.messages.find((m) => m.id === messageId);
+    const targetMessage = messages.find((m) => m.id === messageId);
     const attachments = targetMessage?.attachments;
 
     // 1. Update user message content
@@ -263,7 +300,6 @@ export default function ChatPage() {
     currentStreamingRef.current = null;
   };
 
-  const messages = activeThread?.messages ?? [];
   const hasMessages = messages.length > 0;
   const lastMessage = messages[messages.length - 1];
   const showInlinePrompts =
@@ -306,11 +342,18 @@ export default function ChatPage() {
           onOpenMobileMenu={() => setMobileOpen(true)}
         />
 
+        {/* In-Chat Message Search Bar */}
+        <MessageSearch />
+
         {/* Message Feed */}
         <MessageFeed
           messages={messages}
           threadId={activeThread?.id}
           isStreaming={isStreaming}
+          searchQuery={debouncedQuery}
+          activeMatchIndex={activeIndex}
+          matches={searchMatches}
+          isSearchOpen={isSearchOpen}
           onSelectQuickPrompt={(prompt) => handleSendMessage(prompt)}
           onRegenerate={handleRegenerate}
           onEditSave={handleEditSave}

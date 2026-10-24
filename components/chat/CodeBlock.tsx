@@ -1,16 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import React, { useState } from 'react';
+import { Prism as SyntaxHighlighter, createElement } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Check, Copy } from 'lucide-react';
+import { escapeRegExp } from '@/lib/searchMessages';
 
 interface CodeBlockProps {
   language?: string;
   value: string;
+  searchQuery?: string;
+  activeMatchIndex?: number;
+  getCodeMatchIndex?: () => number;
 }
 
-export function CodeBlock({ language, value }: CodeBlockProps) {
+export function CodeBlock({
+  language,
+  value,
+  searchQuery,
+  activeMatchIndex,
+  getCodeMatchIndex,
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,6 +32,82 @@ export function CodeBlock({ language, value }: CodeBlockProps) {
       // fallback
     }
   };
+
+  const hasSearchMatch =
+    Boolean(searchQuery?.trim()) &&
+    value.toLowerCase().includes(searchQuery!.trim().toLowerCase());
+
+  const customRenderer = hasSearchMatch && getCodeMatchIndex
+    ? ({ rows, stylesheet, useInlineStyles }: { rows: unknown[]; stylesheet: unknown; useInlineStyles: boolean }) => {
+        const query = searchQuery!.trim();
+        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+
+        // Transform AST nodes to inject <mark> elements for search matches
+        const transformNode = (node: unknown): unknown => {
+          const n = node as { type?: string; value?: string; children?: unknown[] };
+          if (n.type === 'text' && typeof n.value === 'string') {
+            const text = n.value;
+            if (!text.toLowerCase().includes(query.toLowerCase())) {
+              return node;
+            }
+            const parts = text.split(regex);
+            return parts.map((part) => {
+              if (part.toLowerCase() === query.toLowerCase()) {
+                const matchIdx = getCodeMatchIndex();
+                const isActive = matchIdx === activeMatchIndex;
+                return {
+                  type: 'element',
+                  tagName: 'mark',
+                  properties: {
+                    id: `search-match-${matchIdx}`,
+                    'data-search-match-index': matchIdx,
+                    className: [
+                      'rounded-2xs px-0.5 transition-colors',
+                      isActive
+                        ? 'bg-amber-400 text-zinc-950 font-semibold ring-2 ring-amber-500/80 dark:bg-amber-400 dark:text-zinc-950'
+                        : 'bg-yellow-200/80 text-zinc-900 dark:bg-amber-500/30 dark:text-amber-200',
+                    ],
+                  },
+                  children: [{ type: 'text', value: part }],
+                };
+              }
+              return { type: 'text', value: part };
+            });
+          }
+
+          if (Array.isArray(n.children)) {
+            return {
+              ...n,
+              children: n.children.flatMap(transformNode),
+            };
+          }
+
+          return node;
+        };
+
+        const transformedRows = rows.map((row) => {
+          const r = row as { type?: string; children?: unknown[] };
+          return {
+            ...r,
+            type: r.type || 'element',
+            children: Array.isArray(r.children) ? r.children.flatMap(transformNode) : [],
+          };
+        });
+
+        return (
+          <code>
+            {transformedRows.map((node, i) =>
+              createElement({
+                node: node as never,
+                stylesheet: stylesheet as never,
+                useInlineStyles,
+                key: `code-row-${i}`,
+              })
+            )}
+          </code>
+        );
+      }
+    : undefined;
 
   return (
     <div className="relative my-3 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 text-xs shadow-sm">
@@ -59,6 +145,7 @@ export function CodeBlock({ language, value }: CodeBlockProps) {
             fontSize: '0.8125rem',
           }}
           wrapLongLines={false}
+          renderer={customRenderer}
         >
           {value}
         </SyntaxHighlighter>

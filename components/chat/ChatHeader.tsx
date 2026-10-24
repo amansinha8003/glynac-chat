@@ -1,8 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Menu, Shield, Pin } from 'lucide-react';
+import { Menu, Shield, Pin, Search } from 'lucide-react';
 import { Thread } from '@/types/chat';
+import { useSearchStore } from '@/store/searchStore';
 
 interface ChatHeaderProps {
   thread?: Thread;
@@ -10,6 +11,8 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ thread, onOpenMobileMenu }: ChatHeaderProps) {
+  const toggleSearch = useSearchStore((state) => state.toggleSearch);
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200/80 bg-white/60 px-4 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/60">
       <div className="flex items-center gap-3 overflow-hidden">
@@ -39,6 +42,18 @@ export function ChatHeader({ thread, onOpenMobileMenu }: ChatHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          onClick={toggleSearch}
+          className="h-8 w-8 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          aria-label="Search messages"
+          title="Search messages (Ctrl+F)"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
         <span className="hidden items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-600 shadow-2xs sm:inline-flex dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
           <Shield className="h-3 w-3 text-emerald-500" />
           SEC & FINRA Guardrails Active

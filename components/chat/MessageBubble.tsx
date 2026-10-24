@@ -7,15 +7,21 @@ import { CitationPill } from './CitationPill';
 import { AttachmentChip } from './AttachmentChip';
 import { MessageActions } from './MessageActions';
 import { getUniqueCitations } from '@/lib/citations';
+import { SearchMatch, escapeRegExp } from '@/lib/searchMessages';
 import { Button } from '@/components/ui/button';
 import { format, isValid } from 'date-fns';
 import { Bot, User, Bookmark, Pencil } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MessageBubbleProps {
   message: Message;
   threadId?: string;
   isLastAssistantMessage?: boolean;
   isStreaming?: boolean;
+  searchQuery?: string;
+  activeMatchIndex?: number;
+  contentMatches?: SearchMatch[];
+  attachmentMatches?: SearchMatch[];
   onRegenerate?: () => void;
   onEditSave?: (messageId: string, newContent: string) => void;
 }
@@ -25,6 +31,10 @@ export function MessageBubble({
   threadId,
   isLastAssistantMessage = false,
   isStreaming = false,
+  searchQuery,
+  activeMatchIndex,
+  contentMatches,
+  attachmentMatches,
   onRegenerate,
   onEditSave,
 }: MessageBubbleProps) {
@@ -63,6 +73,52 @@ export function MessageBubble({
       e.preventDefault();
       handleSave();
     }
+  };
+
+  let contentCursor = 0;
+  const getContentMatchIndex = () => {
+    if (!contentMatches || contentCursor >= contentMatches.length) return -1;
+    return contentMatches[contentCursor++].matchIndex;
+  };
+
+  const createAttachmentMatchGetter = (attId: string) => {
+    const attMatches = attachmentMatches?.filter((m) => m.attachmentId === attId) || [];
+    let attCursor = 0;
+    return () => {
+      if (attCursor >= attMatches.length) return -1;
+      return attMatches[attCursor++].matchIndex;
+    };
+  };
+
+  const renderUserContent = () => {
+    const trimmed = searchQuery?.trim();
+    if (!trimmed || !contentMatches?.length) {
+      return message.content;
+    }
+    const regex = new RegExp(`(${escapeRegExp(trimmed)})`, 'gi');
+    const parts = message.content.split(regex);
+    return parts.map((part, index) => {
+      if (part.toLowerCase() === trimmed.toLowerCase()) {
+        const matchIdx = getContentMatchIndex();
+        const isActive = matchIdx === activeMatchIndex;
+        return (
+          <mark
+            key={index}
+            id={`search-match-${matchIdx}`}
+            data-search-match-index={matchIdx}
+            className={cn(
+              'rounded-2xs px-0.5 transition-colors',
+              isActive
+                ? 'bg-amber-400 text-zinc-950 font-semibold ring-2 ring-amber-500/80 dark:bg-amber-400 dark:text-zinc-950'
+                : 'bg-yellow-200/80 text-zinc-900 dark:bg-amber-500/30 dark:text-amber-200'
+            )}
+          >
+            {part}
+          </mark>
+        );
+      }
+      return part;
+    });
   };
 
   if (isUser) {
@@ -122,11 +178,13 @@ export function MessageBubble({
     return (
       <div className="group flex w-full flex-col items-end transition-opacity animate-in fade-in-50 duration-200">
         <div className="flex max-w-[85%] items-end gap-2 sm:max-w-[75%]">
-          {/* Edit trigger on hover */}
           {!isStreaming && onEditSave && (
             <button
               type="button"
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setIsEditing(true);
+                setEditContent(message.content);
+              }}
               className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-md"
               aria-label="Edit message"
               title="Edit message"
@@ -144,11 +202,14 @@ export function MessageBubble({
                     attachment={att}
                     readOnly
                     className="bg-white/15 border-white/20 text-white dark:bg-white/10 dark:border-white/15 dark:text-white"
+                    searchQuery={searchQuery}
+                    activeMatchIndex={activeMatchIndex}
+                    getAttachmentMatchIndex={createAttachmentMatchGetter(att.id)}
                   />
                 ))}
               </div>
             )}
-            <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+            <p className="whitespace-pre-wrap leading-relaxed">{renderUserContent()}</p>
           </div>
           <div className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 sm:flex dark:bg-emerald-950 dark:text-emerald-300">
             <User className="h-3.5 w-3.5" />
@@ -180,7 +241,13 @@ export function MessageBubble({
             </div>
           ) : (
             <div className="relative">
-              <MarkdownRenderer content={message.content} isStreaming={message.isStreaming} />
+              <MarkdownRenderer
+                content={message.content}
+                isStreaming={message.isStreaming}
+                searchQuery={searchQuery}
+                activeMatchIndex={activeMatchIndex}
+                getContentMatchIndex={getContentMatchIndex}
+              />
               {message.isStreaming && (
                 <span
                   className="inline-block h-3.5 w-1.5 translate-y-0.5 ml-1 rounded-2xs bg-emerald-500 animate-pulse align-middle"
