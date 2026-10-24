@@ -237,29 +237,27 @@ Here are three compliance questions you can ask me:
 }
 
 function getDocumentReviewResponse(attachments: Attachment[]): string {
-  const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
+  const fileNames = attachments.map((a) => a.name).join(', ');
 
-  return `I reviewed the attached document(s): ${fileList}.
-
-### Compliance Audit Summary
+  return `I reviewed the attached document(s): ${fileNames}.
 
 | Section | Finding | Risk Level |
 | :--- | :--- | :--- |
-| **Performance Claims** | Past performance references lack required net-of-fees metrics [[cite:sec-206-4-1]] | **High** |
-| **Missing Disclosures** | Key promotional statements lack prominent risk disclosures adjacent to text [[cite:finra-2210-d]] | **High** |
-| **Testimonial Language** | Third-party endorsements require explicit disclosure of material compensation [[cite:sec-206-4-1]] | **Medium** |
-| **Record Retention** | External communication artifacts must be archived in immutable storage [[cite:sec-17a-4]] | **Medium** |
+| **Performance Claims** | Past performance references lack required net-of-fees metrics [[cite:sec-206-4-1]] | High |
+| **Missing Disclosures** | Key promotional statements lack prominent risk disclosures adjacent to text [[cite:finra-2210-d]] | High |
+| **Testimonial Language** | Third-party endorsements require explicit disclosure of material compensation [[cite:sec-206-4-1]] | Medium |
+| **Record Retention** | External communication artifacts must be archived in immutable storage [[cite:sec-17a-4]] | Medium |
 
-### Recommended Actions
-* **Revise Disclosures**: Insert clear and prominent risk disclosures directly adjacent to all performance metrics and testimonials.
+### Recommended actions
+* **Revise Disclosures**: Insert clear and prominent risk disclosures directly adjacent to all performance metrics and testimonials [[cite:finra-2210-d]].
 * **Supervisory Pre-Approval**: Submit the revised document to a Series 24 registered principal for written approval before client dissemination [[cite:finra-3110]].
 * **Archive Audit Records**: Store the original submission, marked-up changes, and approval logs in an immutable WORM-compliant system [[cite:sec-17a-4]].`;
 }
 
 function prependAttachments(baseResponse: string, attachments?: Attachment[]): string {
   if (!attachments || attachments.length === 0) return baseResponse;
-  const fileList = attachments.map((a) => `**"${a.name}"**`).join(', ');
-  return `I reviewed the attached document(s): ${fileList}.\n\n${baseResponse}`;
+  const fileNames = attachments.map((a) => a.name).join(', ');
+  return `I reviewed the attached document(s): ${fileNames}.\n\n${baseResponse}`;
 }
 
 function getResponseForPrompt(prompt: string, attachments?: Attachment[]): string {
