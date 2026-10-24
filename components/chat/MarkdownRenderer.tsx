@@ -126,7 +126,7 @@ export function MarkdownRenderer({
 
             return (
               <code
-                className="rounded-md border border-zinc-200/70 bg-zinc-100 px-1.5 py-0.5 font-mono text-[12.5px] font-medium text-emerald-700 dark:border-zinc-800 dark:bg-zinc-800/80 dark:text-emerald-400"
+                className="rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[12.5px] font-medium text-emerald-700 dark:text-emerald-400"
                 {...props}
               >
                 {processChildrenWithCitations(children)}
@@ -135,7 +135,7 @@ export function MarkdownRenderer({
           },
           table({ children }) {
             return (
-              <div className="my-3.5 w-full overflow-x-auto rounded-xl border border-zinc-200/80 shadow-2xs dark:border-zinc-800">
+              <div className="my-3.5 w-full overflow-x-auto rounded-xl border border-border shadow-2xs">
                 <table className="w-full min-w-[460px] border-collapse text-left text-xs">
                   {children}
                 </table>
@@ -144,49 +144,49 @@ export function MarkdownRenderer({
           },
           thead({ children }) {
             return (
-              <thead className="border-b border-zinc-200 bg-zinc-100/90 font-semibold text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-100">
+              <thead className="border-b border-border bg-muted/80 font-semibold text-foreground">
                 {children}
               </thead>
             );
           },
           tbody({ children }) {
             return (
-              <tbody className="divide-y divide-zinc-200/70 dark:divide-zinc-800/70 [&>tr:nth-child(even)]:bg-zinc-50/70 dark:[&>tr:nth-child(even)]:bg-zinc-900/40">
+              <tbody className="divide-y divide-border/60 [&>tr:nth-child(even)]:bg-muted/30">
                 {children}
               </tbody>
             );
           },
           tr({ children }) {
             return (
-              <tr className="transition-colors hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30">
+              <tr className="transition-colors hover:bg-muted/50">
                 {children}
               </tr>
             );
           },
           th({ children }) {
             return (
-              <th className="px-3.5 py-2.5 text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <th className="px-3.5 py-2.5 text-xs font-semibold tracking-tight text-foreground">
                 {processChildrenWithCitations(children)}
               </th>
             );
           },
           td({ children }) {
             return (
-              <td className="px-3.5 py-2.5 text-xs leading-relaxed text-zinc-700 dark:text-zinc-300">
+              <td className="px-3.5 py-2.5 text-xs leading-relaxed text-foreground/90">
                 {processChildrenWithCitations(children)}
               </td>
             );
           },
           ul({ children }) {
             return (
-              <ul className="my-2.5 ml-5 list-disc space-y-1.5 text-sm text-zinc-800 dark:text-zinc-200">
+              <ul className="my-2.5 ml-5 list-disc space-y-1.5 text-sm text-foreground">
                 {children}
               </ul>
             );
           },
           ol({ children }) {
             return (
-              <ol className="my-2.5 ml-5 list-decimal space-y-1.5 text-sm text-zinc-800 dark:text-zinc-200">
+              <ol className="my-2.5 ml-5 list-decimal space-y-1.5 text-sm text-foreground">
                 {children}
               </ol>
             );
@@ -196,14 +196,14 @@ export function MarkdownRenderer({
           },
           strong({ children }) {
             return (
-              <strong className="font-semibold text-zinc-950 dark:text-zinc-50">
+              <strong className="font-semibold text-foreground">
                 {processChildrenWithCitations(children)}
               </strong>
             );
           },
           blockquote({ children }) {
             return (
-              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-emerald-50/5 py-1.5 pr-3 pl-3.5 text-xs italic text-zinc-600 dark:text-zinc-400">
+              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-muted/30 py-1.5 pr-3 pl-3.5 text-xs italic text-muted-foreground">
                 {processChildrenWithCitations(children)}
               </blockquote>
             );
@@ -222,34 +222,34 @@ export function MarkdownRenderer({
           },
           p({ children }) {
             return (
-              <p className="my-2 leading-relaxed text-zinc-800 first:mt-0 last:mb-0 dark:text-zinc-200">
+              <p className="my-2 leading-relaxed text-foreground/95 first:mt-0 last:mb-0">
                 {processChildrenWithCitations(children)}
               </p>
             );
           },
           h1({ children }) {
             return (
-              <h1 className="mt-4 mb-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <h1 className="mt-4 mb-2 text-lg font-bold tracking-tight text-foreground">
                 {processChildrenWithCitations(children)}
               </h1>
             );
           },
           h2({ children }) {
             return (
-              <h2 className="mt-3.5 mb-2 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <h2 className="mt-3.5 mb-2 text-base font-semibold tracking-tight text-foreground">
                 {processChildrenWithCitations(children)}
               </h2>
             );
           },
           h3({ children }) {
             return (
-              <h3 className="mt-3 mb-1.5 text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <h3 className="mt-3 mb-1.5 text-sm font-semibold tracking-tight text-foreground">
                 {processChildrenWithCitations(children)}
               </h3>
             );
           },
           hr() {
-            return <hr className="my-4 border-zinc-200 dark:border-zinc-800" />;
+            return <hr className="my-4 border-border" />;
           },
         }}
       >

@@ -40,18 +40,19 @@ export function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { threads, activeThreadId, setActiveThread, createThread } = useChatStore();
 
   const grouped = useMemo(() => {
     return groupThreads(threads, searchQuery);
   }, [threads, searchQuery]);
 
-  const handleNewChat = () => {
+  const handleNewChat = React.useCallback(() => {
     createThread();
     if (mobileOpen) {
       onMobileClose();
     }
-  };
+  }, [createThread, mobileOpen, onMobileClose]);
 
   const handleSelectThread = (id: string) => {
     setActiveThread(id);
@@ -59,6 +60,31 @@ export function Sidebar({
       onMobileClose();
     }
   };
+
+  // Keyboard shortcuts: Ctrl/Cmd+K to focus search, Ctrl/Cmd+Shift+O to new chat
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (isCollapsed) {
+          onToggleCollapse();
+        }
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 50);
+      } else if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === 'o'
+      ) {
+        e.preventDefault();
+        handleNewChat();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCollapsed, onToggleCollapse, handleNewChat]);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -73,8 +99,9 @@ export function Sidebar({
 
       {/* Sidebar Container */}
       <aside
+        aria-label="Conversation threads"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col bg-zinc-50 border-r border-zinc-200 transition-all duration-300 ease-in-out dark:bg-zinc-950 dark:border-zinc-800 md:static md:z-auto',
+          'fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 ease-in-out md:static md:z-auto',
           // Mobile responsive position
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0',
           // Desktop width
@@ -84,7 +111,7 @@ export function Sidebar({
         {/* Top Header */}
         <div
           className={cn(
-            'flex h-14 items-center border-b border-zinc-200/80 px-3 dark:border-zinc-800/80',
+            'flex h-14 items-center border-b border-sidebar-border px-3',
             isCollapsed ? 'justify-center' : 'justify-between'
           )}
         >
@@ -156,11 +183,14 @@ export function Sidebar({
           {!isCollapsed ? (
             <Button
               onClick={handleNewChat}
-              className="w-full justify-start gap-2 bg-zinc-900 text-white hover:bg-zinc-800 shadow-xs dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xs"
               size="sm"
             >
               <Plus className="h-4 w-4" />
               <span>New Chat</span>
+              <kbd className="ml-auto hidden text-[10px] text-primary-foreground/70 sm:inline-block font-mono">
+                ⌘⇧O
+              </kbd>
             </Button>
           ) : (
             <Tooltip>
@@ -169,32 +199,33 @@ export function Sidebar({
                   onClick={handleNewChat}
                   variant="default"
                   size="icon-sm"
-                  className="w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                   aria-label="New Chat"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">New Chat</TooltipContent>
+              <TooltipContent side="right">New Chat (⌘⇧O)</TooltipContent>
             </Tooltip>
           )}
 
           {/* Search Input */}
           {!isCollapsed ? (
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-400" />
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 type="text"
-                placeholder="Search threads..."
+                placeholder="Search threads... (⌘K)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 pr-7 text-xs bg-white/70 border-zinc-200/90 dark:bg-zinc-900/60 dark:border-zinc-800 focus-visible:ring-1"
+                className="h-8 pl-8 pr-7 text-xs bg-sidebar/50 border-sidebar-border text-sidebar-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
                   aria-label="Clear search"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -227,7 +258,7 @@ export function Sidebar({
                 <div className="space-y-4">
                   {grouped.map((group) => (
                     <div key={group.label} className="space-y-0.5">
-                      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-zinc-400 dark:text-zinc-500">
+                      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
                         {group.label}
                       </div>
                       <div className="space-y-0.5">
@@ -248,11 +279,11 @@ export function Sidebar({
                 <div className="flex h-48 flex-col items-center justify-center p-4 text-center">
                   {searchQuery ? (
                     <>
-                      <FileQuestion className="h-8 w-8 text-zinc-400/80 mb-2 stroke-1" />
-                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                      <FileQuestion className="h-8 w-8 text-muted-foreground/80 mb-2 stroke-1" />
+                      <p className="text-xs font-semibold text-sidebar-foreground">
                         No threads found
                       </p>
-                      <p className="text-[11px] text-zinc-400 mt-1 max-w-[180px]">
+                      <p className="text-[11px] text-muted-foreground mt-1 max-w-[180px]">
                         No compliance discussions match &ldquo;{searchQuery}&rdquo;.
                       </p>
                       <Button
@@ -266,11 +297,11 @@ export function Sidebar({
                     </>
                   ) : (
                     <>
-                      <MessageSquarePlus className="h-8 w-8 text-zinc-400/80 mb-2 stroke-1" />
-                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                      <MessageSquarePlus className="h-8 w-8 text-muted-foreground/80 mb-2 stroke-1" />
+                      <p className="text-xs font-semibold text-sidebar-foreground">
                         No conversations yet
                       </p>
-                      <p className="text-[11px] text-zinc-400 mt-1 max-w-[180px]">
+                      <p className="text-[11px] text-muted-foreground mt-1 max-w-[180px]">
                         Start an audit review or ask a regulatory question.
                       </p>
                       <Button

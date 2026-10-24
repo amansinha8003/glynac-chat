@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Send, Square, Paperclip, AlertCircle, X } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'framer-motion';
 
 export interface ChatInputHandle {
   addFiles: (files: File[] | FileList) => void;
@@ -191,7 +192,7 @@ export function ChatInput({
     !isStreaming && !disabled && (content.trim().length > 0 || attachments.length > 0);
 
   return (
-    <div className="w-full border-t border-zinc-200/80 bg-white/80 p-3 sm:p-4 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80">
+    <div className="w-full border-t border-border bg-background/80 p-3 sm:p-4 backdrop-blur-md">
       <div className="mx-auto max-w-3xl">
         {/* Hidden File Input */}
         <input
@@ -206,7 +207,7 @@ export function ChatInput({
 
         {/* Inline Error Banner */}
         {errorMessage && (
-          <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700 animate-in fade-in-50 duration-200 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+          <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive animate-in fade-in-50 duration-200">
             <div className="flex items-center gap-1.5 truncate">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{errorMessage}</span>
@@ -214,7 +215,7 @@ export function ChatInput({
             <button
               type="button"
               onClick={() => setErrorMessage(null)}
-              className="rounded p-0.5 text-rose-500 hover:bg-rose-100 hover:text-rose-800 dark:hover:bg-rose-900/50"
+              className="rounded p-0.5 text-destructive/70 hover:bg-destructive/20 hover:text-destructive"
               aria-label="Dismiss error"
             >
               <X className="h-3.5 w-3.5" />
@@ -228,23 +229,25 @@ export function ChatInput({
           onDragLeave={handleInputDragLeave}
           onDrop={handleInputDrop}
           className={cn(
-            'relative flex flex-col rounded-2xl border bg-white shadow-xs transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 dark:bg-zinc-900/90',
+            'relative flex flex-col rounded-2xl border bg-card shadow-2xs transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20',
             isDragOverInput
-              ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/20'
-              : 'border-zinc-200 dark:border-zinc-800'
+              ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-emerald-500/5'
+              : 'border-border'
           )}
         >
           {/* Attachment Chips Header */}
           {attachments.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 border-b border-zinc-100 px-3.5 pt-3 pb-2 dark:border-zinc-800/80">
-              {attachments.map((att) => (
-                <AttachmentChip
-                  key={att.id}
-                  attachment={att}
-                  onRemove={handleRemoveAttachment}
-                />
-              ))}
-              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 ml-1">
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-border/80 px-3.5 pt-3 pb-2">
+              <AnimatePresence>
+                {attachments.map((att) => (
+                  <AttachmentChip
+                    key={att.id}
+                    attachment={att}
+                    onRemove={handleRemoveAttachment}
+                  />
+                ))}
+              </AnimatePresence>
+              <span className="text-[11px] text-muted-foreground ml-1">
                 {attachments.length}/{MAX_FILES}
               </span>
             </div>
@@ -258,11 +261,11 @@ export function ChatInput({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isStreaming || disabled || attachments.length >= MAX_FILES}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:opacity-40 disabled:hover:bg-transparent dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
                 aria-label="Attach documents"
                 title="Attach documents (.pdf, .txt, .md, .json, .docx, .png, .jpg)"
               >
-                <Paperclip className="h-4 w-4" />
+                <Paperclip className="h-4.5 w-4.5" />
               </button>
             </div>
 
@@ -281,20 +284,20 @@ export function ChatInput({
                   ? 'Add instructions for attached files, or press Enter to review...'
                   : 'Ask about compliance policies, regulations, or draft a disclosure... (Enter to send)'
               }
-              className="min-h-[46px] max-h-[150px] w-full resize-none bg-transparent px-3 py-3 pr-12 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none disabled:opacity-60 dark:text-zinc-100 dark:placeholder-zinc-500 leading-relaxed"
+              className="min-h-[46px] max-h-[150px] w-full resize-none bg-transparent px-3 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-60 leading-relaxed"
             />
 
             {/* Right Action: Send or Stop Button */}
-            <div className="pb-2 pr-2.5">
+            <div className="pb-2.5 pr-2.5">
               {isStreaming ? (
                 <Button
                   type="button"
                   size="icon-sm"
                   onClick={onStopStreaming}
-                  className="h-8 w-8 rounded-xl bg-zinc-900 text-white shadow-2xs transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className="h-9 w-9 rounded-xl bg-primary text-primary-foreground shadow-2xs transition hover:bg-primary/90"
                   aria-label="Stop generation"
                 >
-                  <Square className="h-3 w-3 fill-current" />
+                  <Square className="h-3.5 w-3.5 fill-current" />
                 </Button>
               ) : (
                 <Button
@@ -302,7 +305,7 @@ export function ChatInput({
                   size="icon-sm"
                   disabled={!canSend}
                   onClick={handleSend}
-                  className="h-8 w-8 rounded-xl bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                  className="h-9 w-9 rounded-xl bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600"
                   aria-label="Send message"
                 >
                   <Send className="h-4 w-4" />
@@ -313,7 +316,7 @@ export function ChatInput({
         </div>
 
         {/* Footer Guidance */}
-        <div className="mt-1.5 flex items-center justify-between px-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+        <div className="mt-1.5 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
           <span>Max 5 files (10 MB each) · PDF, DOCX, TXT, JSON, MD, PNG, JPG</span>
           <span className="hidden sm:inline-flex items-center gap-1">
             <span>Shift + Enter for new line</span>

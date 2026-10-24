@@ -90,14 +90,14 @@ export function ThreadItem({ thread, isActive, onSelect }: ThreadItemProps) {
         className={cn(
           'group relative flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors cursor-pointer select-none',
           isActive
-            ? 'bg-zinc-200/80 font-medium text-zinc-900 shadow-xs dark:bg-zinc-800/90 dark:text-zinc-100'
-            : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900/60 dark:hover:text-zinc-200'
+            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-2xs'
+            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
         )}
       >
         {thread.pinned ? (
           <Pin className="h-3.5 w-3.5 shrink-0 text-amber-500 fill-amber-500/20" />
         ) : (
-          <MessageSquare className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+          <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         )}
 
         {isEditing ? (
@@ -131,7 +131,7 @@ export function ThreadItem({ thread, isActive, onSelect }: ThreadItemProps) {
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  className="h-6 w-6 rounded-md hover:bg-zinc-300/60 dark:hover:bg-zinc-700/60"
+                  className="h-6 w-6 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground"
                   aria-label="Thread options"
                 >
                   <MoreHorizontal className="h-3.5 w-3.5" />

@@ -58,12 +58,12 @@ export function MessageSearch() {
     <div
       role="search"
       aria-label="In-chat message search"
-      className="w-full border-b border-zinc-200/80 bg-white/95 px-3 py-1.5 backdrop-blur-md transition-all duration-150 animate-in slide-in-from-top-1 dark:border-zinc-800/80 dark:bg-zinc-950/95 shadow-2xs z-30"
+      className="w-full border-b border-border bg-background/95 px-3 py-1.5 backdrop-blur-md transition-all duration-150 animate-in slide-in-from-top-1 shadow-2xs z-30"
     >
       <div className="mx-auto flex max-w-3xl items-center gap-2">
         {/* Search Input Box */}
         <div className="relative flex-1 flex items-center">
-          <Search className="absolute left-2.5 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+          <Search className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <input
             ref={inputRef}
             type="text"
@@ -71,7 +71,7 @@ export function MessageSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search messages and attachments... (Enter / Shift+Enter to navigate)"
-            className="h-8 w-full rounded-lg border border-zinc-200 bg-zinc-50/50 pl-8 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500/30 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-100 dark:focus:bg-zinc-900"
+            className="h-8 w-full rounded-lg border border-input bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:bg-background focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
             aria-label="Search messages input"
           />
         </div>
@@ -82,11 +82,11 @@ export function MessageSearch() {
             <span
               className={`text-[11px] font-medium select-none ${
                 totalMatches === 0
-                  ? 'text-rose-500 dark:text-rose-400'
-                  : 'text-zinc-500 dark:text-zinc-400'
+                  ? 'text-destructive font-semibold'
+                  : 'text-muted-foreground'
               }`}
             >
-              {totalMatches === 0 ? 'No results' : `${activeIndex + 1} of ${totalMatches}`}
+              {totalMatches === 0 ? 'No matches' : `${activeIndex + 1} of ${totalMatches}`}
             </span>
           ) : null}
         </div>
@@ -99,7 +99,7 @@ export function MessageSearch() {
             size="icon-xs"
             onClick={prevMatch}
             disabled={totalMatches === 0}
-            className="h-7 w-7 text-zinc-600 hover:text-zinc-900 disabled:opacity-30 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
             aria-label="Previous match"
             title="Previous match (Shift+Enter)"
           >
@@ -112,7 +112,7 @@ export function MessageSearch() {
             size="icon-xs"
             onClick={nextMatch}
             disabled={totalMatches === 0}
-            className="h-7 w-7 text-zinc-600 hover:text-zinc-900 disabled:opacity-30 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
             aria-label="Next match"
             title="Next match (Enter)"
           >
@@ -125,7 +125,7 @@ export function MessageSearch() {
             variant="ghost"
             size="icon-xs"
             onClick={closeSearch}
-            className="h-7 w-7 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
             aria-label="Close search"
             title="Close search (Esc)"
           >

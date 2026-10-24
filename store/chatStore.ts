@@ -1,8 +1,37 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 import { Thread, Message } from '@/types/chat';
 import { MOCK_CHATS } from '@/data/mockChats';
+
+const safeStorage: StateStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      if (typeof window === 'undefined') return null;
+      return window.localStorage.getItem(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(name, value);
+      }
+    } catch {
+      // storage unavailable or quota exceeded
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(name);
+      }
+    } catch {
+      // ignore
+    }
+  },
+};
 
 export interface ChatState {
   threads: Thread[];
@@ -227,11 +256,16 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'compliance-chat',
-      onRehydrateStorage: () => (state) => {
-        if (state && (!state.threads || state.threads.length === 0)) {
-          state.threads = MOCK_CHATS;
-          if (!state.activeThreadId && MOCK_CHATS[0]) {
-            state.activeThreadId = MOCK_CHATS[0].id;
+      storage: createJSONStorage(() => safeStorage),
+      onRehydrateStorage: () => (state, error) => {
+        if (error || !state || !state.threads || !Array.isArray(state.threads) || state.threads.length === 0) {
+          if (state) {
+            state.threads = MOCK_CHATS;
+            state.activeThreadId = MOCK_CHATS[0]?.id ?? null;
+          }
+        } else {
+          if (!state.activeThreadId || !state.threads.some((t) => t.id === state.activeThreadId)) {
+            state.activeThreadId = state.threads[0]?.id ?? null;
           }
         }
       },

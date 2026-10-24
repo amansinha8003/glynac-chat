@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { format, isValid } from 'date-fns';
 import { Bot, User, Bookmark, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface MessageBubbleProps {
   message: Message;
@@ -39,6 +40,7 @@ export function MessageBubble({
   onEditSave,
 }: MessageBubbleProps) {
   const isUser = message.role === 'user';
+  const shouldReduceMotion = useReducedMotion();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -124,8 +126,13 @@ export function MessageBubble({
   if (isUser) {
     if (isEditing) {
       return (
-        <div className="flex w-full flex-col items-end transition-all animate-in fade-in-50 duration-200">
-          <div className="w-full max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-xs border border-emerald-500 bg-white p-3.5 shadow-md dark:border-emerald-600 dark:bg-zinc-900">
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className="flex w-full flex-col items-end"
+        >
+          <div className="w-full max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-tr-xs border border-emerald-500 bg-card p-3.5 shadow-md">
             {message.attachments && message.attachments.length > 0 && (
               <div className="mb-2.5 flex flex-wrap gap-1.5 justify-start">
                 {message.attachments.map((att) => (
@@ -140,10 +147,10 @@ export function MessageBubble({
               onChange={(e) => setEditContent(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isStreaming}
-              className="w-full resize-none bg-transparent text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 focus:outline-none dark:text-zinc-100"
+              className="w-full resize-none bg-transparent text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
-            <div className="mt-2.5 flex items-center justify-between border-t border-zinc-100 pt-2 dark:border-zinc-800">
-              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 hidden sm:inline">
+            <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2">
+              <span className="text-[10px] text-muted-foreground hidden sm:inline">
                 Esc to cancel · Ctrl+Enter to save
               </span>
               <div className="flex items-center gap-1.5 ml-auto">
@@ -155,7 +162,7 @@ export function MessageBubble({
                     setIsEditing(false);
                     setEditContent(message.content);
                   }}
-                  className="h-7 px-2.5 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Cancel
                 </Button>
@@ -171,12 +178,17 @@ export function MessageBubble({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       );
     }
 
     return (
-      <div className="group flex w-full flex-col items-end transition-opacity animate-in fade-in-50 duration-200">
+      <motion.div
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className="group flex w-full flex-col items-end"
+      >
         <div className="flex max-w-[85%] items-end gap-2 sm:max-w-[75%]">
           {!isStreaming && onEditSave && (
             <button
@@ -185,7 +197,7 @@ export function MessageBubble({
                 setIsEditing(true);
                 setEditContent(message.content);
               }}
-              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-md"
+              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-foreground rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label="Edit message"
               title="Edit message"
             >
@@ -193,7 +205,7 @@ export function MessageBubble({
             </button>
           )}
 
-          <div className="rounded-2xl rounded-tr-xs bg-emerald-600 px-4 py-2.5 text-sm text-white shadow-xs dark:bg-emerald-600 dark:text-white">
+          <div className="rounded-2xl rounded-tr-xs bg-emerald-600 px-4 py-2.5 text-sm text-white shadow-xs max-w-full">
             {message.attachments && message.attachments.length > 0 && (
               <div className="mb-2 flex flex-wrap gap-1.5 justify-start">
                 {message.attachments.map((att) => (
@@ -209,30 +221,35 @@ export function MessageBubble({
                 ))}
               </div>
             )}
-            <p className="whitespace-pre-wrap leading-relaxed">{renderUserContent()}</p>
+            <p className="whitespace-pre-wrap leading-relaxed break-words">{renderUserContent()}</p>
           </div>
           <div className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 sm:flex dark:bg-emerald-950 dark:text-emerald-300">
             <User className="h-3.5 w-3.5" />
           </div>
         </div>
         {formattedTime && (
-          <span className="mt-1 px-1 text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+          <span className="mt-1 px-1 text-[11px] font-medium text-muted-foreground">
             {formattedTime}
           </span>
         )}
-      </div>
+      </motion.div>
     );
   }
 
   const uniqueCitations = !isUser && message.content ? getUniqueCitations(message.content) : [];
 
   return (
-    <div className="group flex w-full flex-col items-start transition-opacity animate-in fade-in-50 duration-200">
-      <div className="flex max-w-[95%] items-start gap-2.5 sm:max-w-[90%] md:max-w-[85%]">
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="group flex w-full flex-col items-start"
+    >
+      <div className="flex max-w-[95%] items-start gap-2.5 sm:max-w-[90%] md:max-w-[85%] w-full">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 shadow-2xs dark:border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-400">
           <Bot className="h-4 w-4" />
         </div>
-        <div className="min-w-0 flex-1 rounded-2xl rounded-tl-xs border border-zinc-200/80 bg-white px-4 py-3 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="min-w-0 flex-1 rounded-2xl rounded-tl-xs border border-border bg-card px-4 py-3 shadow-2xs text-card-foreground">
           {message.isStreaming && !message.content ? (
             <div className="flex items-center gap-1.5 py-1 px-0.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
@@ -240,7 +257,7 @@ export function MessageBubble({
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" />
             </div>
           ) : (
-            <div className="relative">
+            <div className="relative break-words">
               <MarkdownRenderer
                 content={message.content}
                 isStreaming={message.isStreaming}
@@ -257,8 +274,8 @@ export function MessageBubble({
 
               {/* Sources footer for assistant messages */}
               {uniqueCitations.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
-                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+                <div className="mt-4 pt-3 border-t border-border">
+                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-semibold text-muted-foreground">
                     <Bookmark className="h-3 w-3 text-emerald-500" />
                     <span>Sources ({uniqueCitations.length})</span>
                   </div>
@@ -281,7 +298,7 @@ export function MessageBubble({
       {/* Footer info: timestamp and message actions */}
       <div className="flex items-center gap-3 pl-10 mt-1">
         {formattedTime && (
-          <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+          <span className="text-[11px] font-medium text-muted-foreground">
             {formattedTime}
           </span>
         )}
@@ -296,6 +313,6 @@ export function MessageBubble({
           />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

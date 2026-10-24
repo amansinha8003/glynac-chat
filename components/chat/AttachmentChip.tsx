@@ -49,6 +49,8 @@ function getFileIcon(filename: string, mimeType?: string) {
   return <File className="h-3.5 w-3.5 text-zinc-500 shrink-0" />;
 }
 
+import { motion, useReducedMotion } from 'framer-motion';
+
 export function AttachmentChip({
   attachment,
   onRemove,
@@ -58,6 +60,8 @@ export function AttachmentChip({
   activeMatchIndex,
   getAttachmentMatchIndex,
 }: AttachmentChipProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   const renderName = () => {
     const trimmed = searchQuery?.trim();
     if (!trimmed || !getAttachmentMatchIndex || !attachment.name.toLowerCase().includes(trimmed.toLowerCase())) {
@@ -92,12 +96,17 @@ export function AttachmentChip({
   };
 
   return (
-    <div
+    <motion.div
+      layout={!shouldReduceMotion}
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
       className={cn(
-        'group inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-all shadow-2xs select-none',
+        'group inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors shadow-2xs select-none max-w-full',
         readOnly
-          ? 'bg-zinc-100/90 border-zinc-200 text-zinc-800 dark:bg-zinc-800/80 dark:border-zinc-700 dark:text-zinc-200'
-          : 'bg-white border-zinc-200/90 text-zinc-800 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700',
+          ? 'bg-muted/80 border-border text-foreground'
+          : 'bg-card border-border text-card-foreground hover:border-muted-foreground/30',
         className
       )}
     >
@@ -105,12 +114,12 @@ export function AttachmentChip({
 
       <span
         title={attachment.name}
-        className="max-w-[130px] truncate font-medium text-xs sm:max-w-[180px]"
+        className="max-w-[130px] truncate font-medium text-xs sm:max-w-[200px]"
       >
         {renderName()}
       </span>
 
-      <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
+      <span className="text-[10px] text-muted-foreground font-mono shrink-0">
         {formatFileSize(attachment.size)}
       </span>
 
@@ -121,12 +130,12 @@ export function AttachmentChip({
             e.stopPropagation();
             onRemove(attachment.id);
           }}
-          className="ml-0.5 rounded-full p-0.5 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+          className="ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring shrink-0"
           aria-label={`Remove attachment ${attachment.name}`}
         >
           <X className="h-3 w-3" />
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }

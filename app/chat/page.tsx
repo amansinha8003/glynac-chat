@@ -9,6 +9,8 @@ import { MessageSearch } from '@/components/chat/MessageSearch';
 import { MessageFeed } from '@/components/chat/MessageFeed';
 import { ChatInput, ChatInputHandle } from '@/components/chat/ChatInput';
 import { QuickPrompts } from '@/components/chat/QuickPrompts';
+import { ChatSkeleton } from '@/components/chat/ChatSkeleton';
+import { ChatErrorBoundary } from '@/components/chat/ChatErrorBoundary';
 import { streamMockResponse } from '@/lib/streamMock';
 import { searchMessages } from '@/lib/searchMessages';
 import { Attachment, Message } from '@/types/chat';
@@ -19,6 +21,7 @@ const emptySubscribe = () => () => {};
 
 export default function ChatPage() {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [isHydrating, setIsHydrating] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -85,15 +88,16 @@ export default function ChatPage() {
     setTotalMatches(searchMatches.length);
   }, [searchMatches.length, setTotalMatches]);
 
-  if (!mounted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-          <span>Loading compliance workspace...</span>
-        </div>
-      </div>
-    );
+  // 400ms skeleton display while Zustand store rehydrates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsHydrating(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!mounted || isHydrating) {
+    return <ChatSkeleton />;
   }
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
@@ -306,7 +310,7 @@ export default function ChatPage() {
     hasMessages && !isStreaming && lastMessage?.role === 'assistant';
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="flex h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-background text-foreground antialiased">
       {/* Sidebar (Left Column) */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -321,11 +325,11 @@ export default function ChatPage() {
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative flex flex-1 flex-col overflow-hidden bg-zinc-50/50 dark:bg-zinc-900/20"
+        className="relative flex flex-1 flex-col overflow-hidden bg-background"
       >
         {/* Full-area Drop Overlay */}
         {isDraggingFiles && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-zinc-900/75 p-6 text-white backdrop-blur-xs animate-in fade-in-0 duration-150">
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/75 p-6 text-white backdrop-blur-xs animate-in fade-in-0 duration-150">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 ring-8 ring-emerald-500/10 mb-3 animate-bounce">
               <Upload className="h-8 w-8" />
             </div>
@@ -345,23 +349,25 @@ export default function ChatPage() {
         {/* In-Chat Message Search Bar */}
         <MessageSearch />
 
-        {/* Message Feed */}
-        <MessageFeed
-          messages={messages}
-          threadId={activeThread?.id}
-          isStreaming={isStreaming}
-          searchQuery={debouncedQuery}
-          activeMatchIndex={activeIndex}
-          matches={searchMatches}
-          isSearchOpen={isSearchOpen}
-          onSelectQuickPrompt={(prompt) => handleSendMessage(prompt)}
-          onRegenerate={handleRegenerate}
-          onEditSave={handleEditSave}
-        />
+        {/* Message Feed with Error Boundary */}
+        <ChatErrorBoundary>
+          <MessageFeed
+            messages={messages}
+            threadId={activeThread?.id}
+            isStreaming={isStreaming}
+            searchQuery={debouncedQuery}
+            activeMatchIndex={activeIndex}
+            matches={searchMatches}
+            isSearchOpen={isSearchOpen}
+            onSelectQuickPrompt={(prompt) => handleSendMessage(prompt)}
+            onRegenerate={handleRegenerate}
+            onEditSave={handleEditSave}
+          />
+        </ChatErrorBoundary>
 
         {/* Suggested Quick Prompts (above input after assistant finishes) */}
         {showInlinePrompts && (
-          <div className="w-full border-t border-zinc-200/50 bg-white/60 px-4 py-1 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-950/60">
+          <div className="w-full border-t border-border bg-background/60 px-4 py-1 backdrop-blur-md">
             <div className="mx-auto max-w-3xl">
               <QuickPrompts
                 onSelectPrompt={(prompt) => handleSendMessage(prompt)}

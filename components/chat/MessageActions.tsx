@@ -52,7 +52,7 @@ export function MessageActions({
     <TooltipProvider delayDuration={200}>
       <div
         className={cn(
-          'flex items-center gap-1 mt-1 text-zinc-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity',
+          'flex items-center gap-1 mt-1 text-muted-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity',
           className
         )}
       >
@@ -62,7 +62,7 @@ export function MessageActions({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label={copied ? 'Copied response' : 'Copy response'}
             >
               {copied ? (
@@ -84,10 +84,10 @@ export function MessageActions({
               type="button"
               onClick={() => handleFeedback('up')}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400',
+                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 message.feedback === 'up'
-                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400'
-                  : 'hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'hover:bg-muted hover:text-foreground'
               )}
               aria-label={message.feedback === 'up' ? 'Remove helpful rating' : 'Good response'}
             >
@@ -111,17 +111,17 @@ export function MessageActions({
               type="button"
               onClick={() => handleFeedback('down')}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400',
+                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 message.feedback === 'down'
-                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400'
-                  : 'hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+                  ? 'bg-destructive/10 text-destructive'
+                  : 'hover:bg-muted hover:text-foreground'
               )}
               aria-label={message.feedback === 'down' ? 'Remove unhelpful rating' : 'Bad response'}
             >
               <ThumbsDown
                 className={cn(
                   'h-3.5 w-3.5',
-                  message.feedback === 'down' && 'fill-rose-500/20'
+                  message.feedback === 'down' && 'fill-destructive/20'
                 )}
               />
             </button>
@@ -139,7 +139,7 @@ export function MessageActions({
                 type="button"
                 onClick={onRegenerate}
                 disabled={isStreaming}
-                className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
                 aria-label="Regenerate response"
               >
                 <RotateCcw className="h-3.5 w-3.5" />

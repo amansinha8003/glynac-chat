@@ -47,8 +47,8 @@ export function CitationPill({
           className={cn(
             'inline-flex items-center gap-1 mx-0.5 px-2 py-0.5 align-baseline rounded-full text-[11px] font-medium transition-all cursor-pointer shadow-2xs select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
             isUnknown
-              ? 'bg-zinc-100 text-zinc-600 border border-zinc-200 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 dark:hover:bg-zinc-700/80'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100 hover:border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60 dark:hover:bg-emerald-900/60',
+              ? 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
+              : 'bg-emerald-500/10 text-emerald-800 border border-emerald-500/30 hover:bg-emerald-500/20 dark:text-emerald-300',
             className
           )}
         >
@@ -58,7 +58,7 @@ export function CitationPill({
             </span>
           )}
           {isUnknown ? (
-            <AlertCircle className="h-3 w-3 shrink-0 text-zinc-400 dark:text-zinc-500" />
+            <AlertCircle className="h-3 w-3 shrink-0 text-muted-foreground" />
           ) : (
             <BookOpen className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400" />
           )}
@@ -71,19 +71,19 @@ export function CitationPill({
         side="top"
         sideOffset={6}
         collisionPadding={16}
-        className="w-80 sm:w-96 max-w-[calc(100vw-2rem)] p-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-xl z-50 animate-in fade-in-0 zoom-in-95 duration-150"
+        className="w-80 sm:w-96 max-w-[calc(100vw-2rem)] p-3.5 bg-popover text-popover-foreground border border-border shadow-lg rounded-xl z-50 animate-in fade-in-0 zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-2 border-b border-zinc-100 pb-2.5 dark:border-zinc-800">
+        <div className="flex items-start justify-between gap-2 border-b border-border pb-2.5">
           <div className="flex items-start gap-2 min-w-0">
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <FileText className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">
-              <h4 className="text-xs font-semibold text-zinc-900 truncate dark:text-zinc-100">
+              <h4 className="text-xs font-semibold text-foreground truncate">
                 {citation.label}
               </h4>
-              <p className="text-[11px] text-zinc-500 truncate dark:text-zinc-400">
+              <p className="text-[11px] text-muted-foreground truncate">
                 {citation.source}
               </p>
             </div>
@@ -91,7 +91,7 @@ export function CitationPill({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             aria-label="Close citation details"
           >
             <X className="h-3.5 w-3.5" />
@@ -100,17 +100,17 @@ export function CitationPill({
 
         {/* Excerpt */}
         <div className="my-2.5">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
             Statutory Excerpt
           </span>
-          <blockquote className="mt-1 rounded-r-md border-l-2 border-emerald-500 bg-emerald-50/50 py-1.5 pr-2 pl-3 text-xs italic leading-relaxed text-zinc-700 max-h-36 overflow-y-auto dark:bg-emerald-950/20 dark:text-zinc-300">
+          <blockquote className="mt-1 rounded-r-md border-l-2 border-emerald-500 bg-emerald-500/5 py-1.5 pr-2 pl-3 text-xs italic leading-relaxed text-foreground/90 max-h-36 overflow-y-auto">
             &ldquo;{citation.excerpt}&rdquo;
           </blockquote>
         </div>
 
         {/* Footer */}
         <div className="mt-1 flex items-center justify-between pt-1">
-          <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+          <span className="text-[10px] text-muted-foreground">
             Illustrative excerpt · see source for full text
           </span>
           {citation.docUrl ? (
@@ -118,13 +118,13 @@ export function CitationPill({
               href={citation.docUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white shadow-2xs transition hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+              className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white shadow-2xs transition hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40"
             >
               <span>Open document</span>
               <ExternalLink className="h-3 w-3" />
             </a>
           ) : (
-            <span className="text-[11px] text-zinc-400 italic">No external link</span>
+            <span className="text-[11px] text-muted-foreground italic">No external link</span>
           )}
         </div>
       </PopoverContent>

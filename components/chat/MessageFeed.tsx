@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Message } from '@/types/chat';
 import { MessageBubble } from './MessageBubble';
 import { QuickPrompts } from './QuickPrompts';
 import { SearchMatch } from '@/lib/searchMessages';
-import { MessageSquarePlus } from 'lucide-react';
+import { ShieldCheck, ArrowDown } from 'lucide-react';
 
 interface MessageFeedProps {
   messages: Message[];
@@ -35,10 +35,12 @@ export function MessageFeed({
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef<boolean>(true);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
 
   // Reset auto-scroll flag when switching threads
   useEffect(() => {
     shouldAutoScrollRef.current = true;
+    setShowScrollBottom(false);
     const el = containerRef.current;
     if (el) {
       el.scrollTop = el.scrollHeight;
@@ -50,8 +52,18 @@ export function MessageFeed({
     const el = containerRef.current;
     if (!el) return;
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    // Allow auto-scroll only if user is within 60px of the bottom
-    shouldAutoScrollRef.current = distanceFromBottom <= 60;
+    // Allow auto-scroll only if user is within 80px of the bottom
+    shouldAutoScrollRef.current = distanceFromBottom <= 80;
+    setShowScrollBottom(distanceFromBottom > 150);
+  };
+
+  const scrollToBottom = () => {
+    const el = containerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      shouldAutoScrollRef.current = true;
+      setShowScrollBottom(false);
+    }
   };
 
   // Auto-scroll when messages length, last message content, or streaming state changes
@@ -88,19 +100,30 @@ export function MessageFeed({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto px-4 py-6"
+      className="relative flex-1 overflow-y-auto px-4 py-6 scroll-smooth"
+      tabIndex={0}
+      aria-label="Message feed"
     >
+      {/* Live Region for Screen Readers */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {isStreaming
+          ? 'Compliance AI is streaming a regulatory response.'
+          : messages.length > 0
+          ? 'Response complete.'
+          : 'Ready for inquiry.'}
+      </div>
+
       <div className="mx-auto flex min-h-full max-w-3xl flex-col">
         {messages.length === 0 ? (
           <div className="my-auto flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50 duration-300">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/50 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-950/20">
-              <MessageSquarePlus className="h-7 w-7" />
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-8 ring-emerald-500/5 dark:text-emerald-400">
+              <ShieldCheck className="h-7 w-7" />
             </div>
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-              Start a conversation
+            <h3 className="text-base font-semibold tracking-tight text-foreground">
+              Welcome to Compliance AI
             </h3>
-            <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-              Query regulatory requirements, evaluate communications for SEC & FINRA compliance, or test disclosures.
+            <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-muted-foreground">
+              Query SEC & FINRA regulations, evaluate marketing communications, or verify mandatory disclosures against regulatory rulebooks.
             </p>
 
             {onSelectQuickPrompt && (
@@ -137,6 +160,19 @@ export function MessageFeed({
           </div>
         )}
       </div>
+
+      {/* Floating Scroll to Bottom Button */}
+      {showScrollBottom && (
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          className="fixed bottom-24 right-6 sm:right-10 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-all hover:bg-muted active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Scroll to latest messages"
+          title="Scroll to bottom"
+        >
+          <ArrowDown className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }
