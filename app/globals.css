@@ -117,11 +117,19 @@
   }
   html {
     font-family: var(--font-sans);
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background);
   }
   body {
     font-family: var(--font-sans);
     @apply bg-background text-foreground text-[15px] selection:bg-[#10a37f]/20 selection:text-[#10a37f];
     line-height: 1.7;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
   }
 }
 

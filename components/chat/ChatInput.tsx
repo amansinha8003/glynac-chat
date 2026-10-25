@@ -192,7 +192,7 @@ export function ChatInput({
     !isStreaming && !disabled && (content.trim().length > 0 || attachments.length > 0);
 
   return (
-    <div className="w-full px-3 pb-3 sm:px-4 sm:pb-4 pt-1 bg-gradient-to-t from-background via-background/95 to-transparent">
+    <div className="w-full shrink-0 px-3 pb-3 sm:px-4 sm:pb-4 pt-1 bg-gradient-to-t from-background via-background/95 to-transparent">
       <div className="mx-auto max-w-3xl">
         {/* Hidden File Input */}
         <input

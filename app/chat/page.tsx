@@ -310,7 +310,7 @@ export default function ChatPage() {
     hasMessages && !isStreaming && lastMessage?.role === 'assistant';
 
   return (
-    <div className="flex h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-background text-foreground antialiased">
+    <div className="flex flex-row h-dvh min-h-screen h-full w-full overflow-hidden bg-background text-foreground antialiased">
       {/* Sidebar (Left Column) */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -325,7 +325,7 @@ export default function ChatPage() {
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative flex flex-1 flex-col overflow-hidden bg-background"
+        className="relative flex flex-1 h-full min-h-0 flex-col overflow-hidden bg-background"
       >
         {/* Full-area Drop Overlay */}
         {isDraggingFiles && (
@@ -367,7 +367,7 @@ export default function ChatPage() {
 
         {/* Suggested Quick Prompts (above input after assistant finishes) */}
         {showInlinePrompts && (
-          <div className="w-full px-4 pt-1 pb-0 bg-transparent">
+          <div className="w-full shrink-0 px-4 pt-1 pb-0 bg-transparent">
             <div className="mx-auto max-w-3xl">
               <QuickPrompts
                 onSelectPrompt={(prompt) => handleSendMessage(prompt)}

@@ -4,11 +4,11 @@ import * as React from 'react';
 
 export function ChatSkeleton() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground antialiased animate-pulse">
+    <div className="flex flex-row h-dvh min-h-screen h-full w-full overflow-hidden bg-background text-foreground antialiased animate-pulse">
       {/* Sidebar Skeleton (Desktop) */}
-      <aside className="hidden md:flex w-72 flex-col border-r border-sidebar-border bg-sidebar shrink-0">
+      <aside className="hidden md:flex w-72 h-full min-h-0 flex-col border-r border-sidebar-border bg-sidebar shrink-0 overflow-hidden">
         {/* Header */}
-        <div className="flex h-13 items-center justify-between border-b border-sidebar-border px-3.5">
+        <div className="flex h-13 shrink-0 items-center justify-between border-b border-sidebar-border px-3.5">
           <div className="flex items-center gap-2">
             <div className="h-6 w-6 rounded-md bg-surface" />
             <div className="h-3.5 w-24 rounded bg-surface" />
@@ -17,13 +17,13 @@ export function ChatSkeleton() {
         </div>
 
         {/* New Chat & Search placeholders */}
-        <div className="space-y-1.5 p-3">
+        <div className="space-y-1.5 shrink-0 p-3">
           <div className="h-9 w-full rounded-lg bg-surface" />
           <div className="h-8 w-full rounded-lg bg-surface" />
         </div>
 
         {/* Thread list skeleton */}
-        <div className="flex-1 space-y-3 px-3 py-2">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 px-3 py-2">
           <div className="h-2.5 w-16 rounded bg-surface" />
           <div className="space-y-1">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -37,9 +37,9 @@ export function ChatSkeleton() {
       </aside>
 
       {/* Main Content Skeleton */}
-      <main className="flex flex-1 flex-col overflow-hidden bg-background">
+      <main className="flex flex-1 h-full min-h-0 flex-col overflow-hidden bg-background">
         {/* Header Skeleton */}
-        <header className="flex h-13 items-center justify-between border-b border-border/80 px-4">
+        <header className="flex h-13 shrink-0 items-center justify-between border-b border-border/80 px-4">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-surface" />
             <div className="h-3.5 w-40 rounded bg-surface" />
@@ -52,7 +52,7 @@ export function ChatSkeleton() {
         </header>
 
         {/* Message Feed Skeleton */}
-        <div className="flex-1 overflow-hidden p-6 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
           <div className="mx-auto max-w-3xl space-y-6">
             {/* User Message Skeleton */}
             <div className="flex justify-end">
@@ -86,7 +86,7 @@ export function ChatSkeleton() {
         </div>
 
         {/* Composer Skeleton - Floating 3xl container */}
-        <div className="px-4 pb-4">
+        <div className="shrink-0 px-4 pb-4">
           <div className="mx-auto max-w-3xl">
             <div className="h-14 w-full rounded-3xl border border-border bg-surface/70" />
           </div>

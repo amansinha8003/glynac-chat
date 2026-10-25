@@ -47,9 +47,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased font-sans`}
+      className={`${inter.variable} ${jetbrainsMono.variable} h-full bg-background antialiased font-sans`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+      <body className="h-full m-0 p-0 overflow-hidden bg-background text-foreground font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -101,7 +101,7 @@ export function Sidebar({
       <aside
         aria-label="Conversation threads"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 ease-in-out md:static md:z-auto',
+          'fixed inset-y-0 left-0 z-50 flex h-full min-h-0 flex-col bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 ease-in-out md:static md:z-auto md:h-full shrink-0 overflow-hidden',
           // Mobile responsive position
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0',
           // Desktop width
@@ -111,7 +111,7 @@ export function Sidebar({
         {/* Top Header */}
         <div
           className={cn(
-            'flex h-13 items-center border-b border-sidebar-border px-3.5',
+            'flex h-13 shrink-0 items-center border-b border-sidebar-border px-3.5',
             isCollapsed ? 'justify-center' : 'justify-between'
           )}
         >
@@ -173,7 +173,7 @@ export function Sidebar({
         </div>
 
         {/* Action Header: New Chat & Search */}
-        <div className="flex flex-col gap-1.5 p-3">
+        <div className="flex flex-col shrink-0 gap-1.5 p-3">
           {/* New Chat Row */}
           {!isCollapsed ? (
             <button
@@ -246,7 +246,7 @@ export function Sidebar({
         </div>
 
         {/* Scrollable Thread List */}
-        <div className="flex-1 overflow-y-auto px-2 pb-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-4">
           {!isCollapsed ? (
             <>
               {grouped.length > 0 ? (
