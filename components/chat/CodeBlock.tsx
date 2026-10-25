@@ -110,9 +110,9 @@ export function CodeBlock({
     : undefined;
 
   return (
-    <div className="relative my-3 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 text-xs shadow-sm">
+    <div className="relative my-3 overflow-hidden rounded-xl border border-zinc-800 bg-[#171717] text-xs shadow-sm">
       <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/80 px-3.5 py-1.5 text-zinc-400">
-        <span className="font-mono text-[11px] font-medium tracking-wide uppercase text-zinc-400">
+        <span className="font-mono text-[11px] font-medium tracking-wider uppercase text-zinc-400">
           {language || 'code'}
         </span>
         <button
@@ -134,7 +134,7 @@ export function CodeBlock({
           )}
         </button>
       </div>
-      <div className="overflow-x-auto text-[13px] leading-relaxed">
+      <div className="overflow-x-auto text-[13px] leading-relaxed font-mono">
         <SyntaxHighlighter
           language={language || 'text'}
           style={oneDark}
@@ -142,7 +142,9 @@ export function CodeBlock({
             margin: 0,
             padding: '1rem',
             background: 'transparent',
-            fontSize: '0.8125rem',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '13px',
+            lineHeight: 1.6,
           }}
           wrapLongLines={false}
           renderer={customRenderer}

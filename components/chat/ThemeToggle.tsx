@@ -39,7 +39,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon-xs"
-          className="h-8 w-8 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="h-8 w-8 text-muted-foreground hover:bg-surface hover:text-foreground transition-colors duration-150 rounded-lg"
           aria-label="Toggle theme"
           title="Toggle theme"
         >
@@ -47,7 +47,7 @@ export function ThemeToggle() {
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-36">
+      <DropdownMenuContent align="end" className="w-36 bg-popover border-border">
         <DropdownMenuItem
           onClick={() => setTheme('light')}
           className="flex items-center justify-between cursor-pointer text-xs"

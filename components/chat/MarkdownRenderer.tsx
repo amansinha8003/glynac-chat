@@ -126,7 +126,7 @@ export function MarkdownRenderer({
 
             return (
               <code
-                className="rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[12.5px] font-medium text-emerald-700 dark:text-emerald-400"
+                className="rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[13px] text-foreground"
                 {...props}
               >
                 {processChildrenWithCitations(children)}
@@ -144,49 +144,49 @@ export function MarkdownRenderer({
           },
           thead({ children }) {
             return (
-              <thead className="border-b border-border bg-muted/80 font-semibold text-foreground">
+              <thead className="border-b border-border bg-surface font-medium text-foreground">
                 {children}
               </thead>
             );
           },
           tbody({ children }) {
             return (
-              <tbody className="divide-y divide-border/60 [&>tr:nth-child(even)]:bg-muted/30">
+              <tbody className="divide-y divide-border/60 [&>tr:nth-child(even)]:bg-surface/30">
                 {children}
               </tbody>
             );
           },
           tr({ children }) {
             return (
-              <tr className="transition-colors hover:bg-muted/50">
+              <tr className="transition-colors hover:bg-surface/60">
                 {children}
               </tr>
             );
           },
           th({ children }) {
             return (
-              <th className="px-3.5 py-2.5 text-xs font-semibold tracking-tight text-foreground">
+              <th className="px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {processChildrenWithCitations(children)}
               </th>
             );
           },
           td({ children }) {
             return (
-              <td className="px-3.5 py-2.5 text-xs leading-relaxed text-foreground/90">
+              <td className="px-3.5 py-2.5 text-xs leading-relaxed text-foreground">
                 {processChildrenWithCitations(children)}
               </td>
             );
           },
           ul({ children }) {
             return (
-              <ul className="my-2.5 ml-5 list-disc space-y-1.5 text-sm text-foreground">
+              <ul className="my-2.5 ml-5 list-disc space-y-1.5 text-[15px] text-foreground">
                 {children}
               </ul>
             );
           },
           ol({ children }) {
             return (
-              <ol className="my-2.5 ml-5 list-decimal space-y-1.5 text-sm text-foreground">
+              <ol className="my-2.5 ml-5 list-decimal space-y-1.5 text-[15px] text-foreground">
                 {children}
               </ol>
             );
@@ -203,7 +203,7 @@ export function MarkdownRenderer({
           },
           blockquote({ children }) {
             return (
-              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-muted/30 py-1.5 pr-3 pl-3.5 text-xs italic text-muted-foreground">
+              <blockquote className="my-3 rounded-r-lg border-l-2 border-emerald-500 bg-surface/40 py-2 pr-3 pl-3.5 text-xs italic text-muted-foreground">
                 {processChildrenWithCitations(children)}
               </blockquote>
             );

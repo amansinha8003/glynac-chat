@@ -367,7 +367,7 @@ export default function ChatPage() {
 
         {/* Suggested Quick Prompts (above input after assistant finishes) */}
         {showInlinePrompts && (
-          <div className="w-full border-t border-border bg-background/60 px-4 py-1 backdrop-blur-md">
+          <div className="w-full px-4 pt-1 pb-0 bg-transparent">
             <div className="mx-auto max-w-3xl">
               <QuickPrompts
                 onSelectPrompt={(prompt) => handleSendMessage(prompt)}

@@ -48,33 +48,33 @@ export function ShortcutsDialog() {
           type="button"
           variant="ghost"
           size="icon-xs"
-          className="h-8 w-8 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="h-8 w-8 text-muted-foreground hover:bg-surface hover:text-foreground transition-colors duration-150 rounded-lg"
           aria-label="Keyboard shortcuts"
           title="Keyboard shortcuts (?)"
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-popover border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+          <DialogTitle className="flex items-center gap-2 text-sm font-medium tracking-tight">
             <Command className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             <span>Keyboard Shortcuts</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="divide-y divide-border pt-2">
+        <div className="divide-y divide-border/60 pt-2">
           {SHORTCUTS.map((item, i) => (
             <div
               key={i}
-              className="flex items-center justify-between py-2.5 text-xs first:pt-0 last:pb-0"
+              className="flex items-center justify-between py-2 text-xs first:pt-0 last:pb-0"
             >
               <span className="text-muted-foreground">{item.description}</span>
               <div className="flex items-center gap-1">
                 {item.keys.map((k, kIdx) => (
                   <kbd
                     key={kIdx}
-                    className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-foreground shadow-2xs"
+                    className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/80 bg-surface px-1.5 font-mono text-[10px] font-medium text-foreground shadow-2xs"
                   >
                     {k}
                   </kbd>

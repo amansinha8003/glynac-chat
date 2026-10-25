@@ -101,12 +101,12 @@ export function AttachmentChip({
       initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.18, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         'group inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors shadow-2xs select-none max-w-full',
         readOnly
-          ? 'bg-muted/80 border-border text-foreground'
-          : 'bg-card border-border text-card-foreground hover:border-muted-foreground/30',
+          ? 'bg-background/80 border-border text-foreground'
+          : 'bg-surface border-border text-foreground hover:bg-surface/90',
         className
       )}
     >

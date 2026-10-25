@@ -52,7 +52,7 @@ export function MessageActions({
     <TooltipProvider delayDuration={200}>
       <div
         className={cn(
-          'flex items-center gap-1 mt-1 text-muted-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity',
+          'flex items-center gap-0.5 text-muted-foreground/70 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150',
           className
         )}
       >
@@ -62,7 +62,7 @@ export function MessageActions({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-surface hover:text-foreground transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label={copied ? 'Copied response' : 'Copy response'}
             >
               {copied ? (
@@ -84,10 +84,10 @@ export function MessageActions({
               type="button"
               onClick={() => handleFeedback('up')}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                'flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 message.feedback === 'up'
                   ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  : 'hover:bg-muted hover:text-foreground'
+                  : 'hover:bg-surface hover:text-foreground'
               )}
               aria-label={message.feedback === 'up' ? 'Remove helpful rating' : 'Good response'}
             >
@@ -111,10 +111,10 @@ export function MessageActions({
               type="button"
               onClick={() => handleFeedback('down')}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+                'flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
                 message.feedback === 'down'
                   ? 'bg-destructive/10 text-destructive'
-                  : 'hover:bg-muted hover:text-foreground'
+                  : 'hover:bg-surface hover:text-foreground'
               )}
               aria-label={message.feedback === 'down' ? 'Remove unhelpful rating' : 'Bad response'}
             >
@@ -139,7 +139,7 @@ export function MessageActions({
                 type="button"
                 onClick={onRegenerate}
                 disabled={isStreaming}
-                className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-surface hover:text-foreground transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
                 aria-label="Regenerate response"
               >
                 <RotateCcw className="h-3.5 w-3.5" />

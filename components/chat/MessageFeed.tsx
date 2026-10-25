@@ -115,15 +115,12 @@ export function MessageFeed({
 
       <div className="mx-auto flex min-h-full max-w-3xl flex-col">
         {messages.length === 0 ? (
-          <div className="my-auto flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50 duration-300">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-8 ring-emerald-500/5 dark:text-emerald-400">
-              <ShieldCheck className="h-7 w-7" />
-            </div>
-            <h3 className="text-base font-semibold tracking-tight text-foreground">
-              Welcome to Compliance AI
-            </h3>
-            <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-muted-foreground">
-              Query SEC & FINRA regulations, evaluate marketing communications, or verify mandatory disclosures against regulatory rulebooks.
+          <div className="my-auto flex flex-col items-center justify-center px-4 py-12 text-center animate-in fade-in-50 duration-300">
+            <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground">
+              How can I help with compliance today?
+            </h2>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              Evaluate marketing materials, audit disclosures, and research SEC & FINRA rules.
             </p>
 
             {onSelectQuickPrompt && (

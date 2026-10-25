@@ -111,29 +111,24 @@ export function Sidebar({
         {/* Top Header */}
         <div
           className={cn(
-            'flex h-14 items-center border-b border-sidebar-border px-3',
+            'flex h-13 items-center border-b border-sidebar-border px-3.5',
             isCollapsed ? 'justify-center' : 'justify-between'
           )}
         >
           {!isCollapsed ? (
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs dark:bg-emerald-500">
-                <ShieldCheck className="h-4.5 w-4.5" />
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <ShieldCheck className="h-3.5 w-3.5" />
               </div>
-              <div className="truncate">
-                <span className="block text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                  Compliance AI
-                </span>
-                <span className="block text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                  Audit Assistant
-                </span>
-              </div>
+              <span className="truncate text-xs font-semibold tracking-tight text-sidebar-foreground">
+                Compliance AI
+              </span>
             </div>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs dark:bg-emerald-500 cursor-pointer">
-                  <ShieldCheck className="h-4.5 w-4.5" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 cursor-pointer">
+                  <ShieldCheck className="h-4 w-4" />
                 </div>
               </TooltipTrigger>
               <TooltipContent side="right">Compliance AI</TooltipContent>
@@ -149,7 +144,7 @@ export function Sidebar({
                   variant="ghost"
                   size="icon-xs"
                   onClick={onToggleCollapse}
-                  className="hidden md:inline-flex text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  className="hidden md:inline-flex text-muted-foreground hover:bg-surface hover:text-sidebar-foreground transition-colors duration-150 rounded-md"
                   aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
                   {isCollapsed ? (
@@ -169,7 +164,7 @@ export function Sidebar({
               variant="ghost"
               size="icon-xs"
               onClick={onMobileClose}
-              className="inline-flex md:hidden text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              className="inline-flex md:hidden text-muted-foreground hover:bg-surface hover:text-sidebar-foreground transition-colors duration-150 rounded-md"
               aria-label="Close sidebar"
             >
               <X className="h-4 w-4" />
@@ -178,28 +173,28 @@ export function Sidebar({
         </div>
 
         {/* Action Header: New Chat & Search */}
-        <div className="flex flex-col gap-2 p-3">
-          {/* New Chat Button */}
+        <div className="flex flex-col gap-1.5 p-3">
+          {/* New Chat Row */}
           {!isCollapsed ? (
-            <Button
+            <button
+              type="button"
               onClick={handleNewChat}
-              className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xs"
-              size="sm"
+              className="group flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-xs font-medium text-sidebar-foreground transition-colors duration-150 hover:bg-surface focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <Plus className="h-4 w-4" />
-              <span>New Chat</span>
-              <kbd className="ml-auto hidden text-[10px] text-primary-foreground/70 sm:inline-block font-mono">
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+              <span>New chat</span>
+              <kbd className="ml-auto hidden text-[10px] text-muted-foreground sm:inline-block font-mono">
                 ⌘⇧O
               </kbd>
-            </Button>
+            </button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   onClick={handleNewChat}
-                  variant="default"
+                  variant="ghost"
                   size="icon-sm"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full h-9 rounded-lg text-sidebar-foreground hover:bg-surface"
                   aria-label="New Chat"
                 >
                   <Plus className="h-4 w-4" />
@@ -211,21 +206,21 @@ export function Sidebar({
 
           {/* Search Input */}
           {!isCollapsed ? (
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+            <div className="relative mt-0.5">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/70 pointer-events-none" />
               <Input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search threads... (⌘K)"
+                placeholder="Search chats... (⌘K)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 pr-7 text-xs bg-sidebar/50 border-sidebar-border text-sidebar-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
+                className="h-8 pl-8 pr-7 text-xs bg-surface/70 hover:bg-surface/90 border border-transparent hover:border-border/50 focus:border-border focus:bg-surface text-sidebar-foreground placeholder:text-muted-foreground/70 rounded-lg transition-colors focus-visible:ring-1 focus-visible:ring-ring"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-2 top-2 text-muted-foreground hover:text-sidebar-foreground"
                   aria-label="Clear search"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -239,13 +234,13 @@ export function Sidebar({
                   variant="ghost"
                   size="icon-sm"
                   onClick={onToggleCollapse}
-                  className="w-full text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  className="w-full h-9 rounded-lg text-muted-foreground hover:bg-surface hover:text-sidebar-foreground"
                   aria-label="Search threads"
                 >
                   <Search className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">Search threads</TooltipContent>
+              <TooltipContent side="right">Search threads (⌘K)</TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -258,7 +253,7 @@ export function Sidebar({
                 <div className="space-y-4">
                   {grouped.map((group) => (
                     <div key={group.label} className="space-y-0.5">
-                      <div className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      <div className="px-2.5 pt-3 pb-1 text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
                         {group.label}
                       </div>
                       <div className="space-y-0.5">
@@ -319,7 +314,7 @@ export function Sidebar({
             </>
           ) : (
             /* Collapsed Rail View */
-            <div className="flex flex-col items-center gap-1.5 py-1">
+            <div className="flex flex-col items-center gap-1 py-1">
               {threads.map((thread) => {
                 const isActive = thread.id === activeThreadId;
                 return (
@@ -328,10 +323,10 @@ export function Sidebar({
                       <button
                         onClick={() => handleSelectThread(thread.id)}
                         className={cn(
-                          'flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
+                          'flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-150',
                           isActive
-                            ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 shadow-xs'
-                            : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200'
+                            ? 'bg-sidebar-accent text-sidebar-foreground shadow-2xs font-medium'
+                            : 'text-muted-foreground hover:bg-surface hover:text-sidebar-foreground'
                         )}
                         aria-label={thread.title}
                       >
@@ -339,8 +334,8 @@ export function Sidebar({
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="right" className="max-w-xs">
-                      <p className="font-medium">{thread.title}</p>
-                      <p className="text-[10px] text-zinc-400">
+                      <p className="font-medium text-xs">{thread.title}</p>
+                      <p className="text-[10px] text-muted-foreground">
                         {thread.messages.length} messages
                       </p>
                     </TooltipContent>

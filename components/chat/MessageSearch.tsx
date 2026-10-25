@@ -71,7 +71,7 @@ export function MessageSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search messages and attachments... (Enter / Shift+Enter to navigate)"
-            className="h-8 w-full rounded-lg border border-input bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:bg-background focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
+            className="h-8 w-full rounded-lg border border-transparent hover:border-border/60 bg-surface/80 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 focus:border-border focus:bg-surface focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
             aria-label="Search messages input"
           />
         </div>
@@ -99,7 +99,7 @@ export function MessageSearch() {
             size="icon-xs"
             onClick={prevMatch}
             disabled={totalMatches === 0}
-            className="h-7 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-7 w-7 text-muted-foreground hover:bg-surface hover:text-foreground rounded-md disabled:opacity-30 transition-colors duration-150"
             aria-label="Previous match"
             title="Previous match (Shift+Enter)"
           >
@@ -112,7 +112,7 @@ export function MessageSearch() {
             size="icon-xs"
             onClick={nextMatch}
             disabled={totalMatches === 0}
-            className="h-7 w-7 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-7 w-7 text-muted-foreground hover:bg-surface hover:text-foreground rounded-md disabled:opacity-30 transition-colors duration-150"
             aria-label="Next match"
             title="Next match (Enter)"
           >
@@ -125,7 +125,7 @@ export function MessageSearch() {
             variant="ghost"
             size="icon-xs"
             onClick={closeSearch}
-            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            className="h-7 w-7 text-muted-foreground hover:bg-surface hover:text-foreground rounded-md transition-colors duration-150"
             aria-label="Close search"
             title="Close search (Esc)"
           >

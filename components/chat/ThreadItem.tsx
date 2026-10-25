@@ -88,16 +88,16 @@ export function ThreadItem({ thread, isActive, onSelect }: ThreadItemProps) {
       <div
         onClick={() => !isEditing && onSelect(thread.id)}
         className={cn(
-          'group relative flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors cursor-pointer select-none',
+          'group relative flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13.5px] transition-colors cursor-pointer select-none',
           isActive
-            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-2xs'
-            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
+            ? 'bg-sidebar-accent font-medium text-sidebar-foreground'
+            : 'text-sidebar-foreground/85 hover:bg-surface hover:text-sidebar-foreground'
         )}
       >
         {thread.pinned ? (
           <Pin className="h-3.5 w-3.5 shrink-0 text-amber-500 fill-amber-500/20" />
         ) : (
-          <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
         )}
 
         {isEditing ? (
@@ -109,11 +109,11 @@ export function ThreadItem({ thread, isActive, onSelect }: ThreadItemProps) {
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleSaveRename}
-              className="h-6 px-1.5 py-0 text-xs bg-background text-foreground ring-1 ring-ring"
+              className="h-7 px-2 py-0 text-xs bg-background text-foreground ring-1 ring-ring"
             />
           </div>
         ) : (
-          <span className="flex-1 truncate text-left text-xs leading-5">
+          <span className="flex-1 truncate text-left text-[13px] leading-5">
             {thread.title}
           </span>
         )}
@@ -131,7 +131,7 @@ export function ThreadItem({ thread, isActive, onSelect }: ThreadItemProps) {
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  className="h-6 w-6 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground"
+                  className="h-6 w-6 rounded-md hover:bg-surface text-muted-foreground hover:text-foreground"
                   aria-label="Thread options"
                 >
                   <MoreHorizontal className="h-3.5 w-3.5" />

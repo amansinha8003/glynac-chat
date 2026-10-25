@@ -192,7 +192,7 @@ export function ChatInput({
     !isStreaming && !disabled && (content.trim().length > 0 || attachments.length > 0);
 
   return (
-    <div className="w-full border-t border-border bg-background/80 p-3 sm:p-4 backdrop-blur-md">
+    <div className="w-full px-3 pb-3 sm:px-4 sm:pb-4 pt-1 bg-gradient-to-t from-background via-background/95 to-transparent">
       <div className="mx-auto max-w-3xl">
         {/* Hidden File Input */}
         <input
@@ -229,7 +229,7 @@ export function ChatInput({
           onDragLeave={handleInputDragLeave}
           onDrop={handleInputDrop}
           className={cn(
-            'relative flex flex-col rounded-2xl border bg-card shadow-2xs transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20',
+            'relative flex flex-col rounded-3xl border border-border bg-surface/80 dark:bg-surface/60 backdrop-blur-md shadow-sm transition-all duration-150 focus-within:border-emerald-500/80 focus-within:ring-2 focus-within:ring-emerald-500/20',
             isDragOverInput
               ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-emerald-500/5'
               : 'border-border'
@@ -237,7 +237,7 @@ export function ChatInput({
         >
           {/* Attachment Chips Header */}
           {attachments.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 border-b border-border/80 px-3.5 pt-3 pb-2">
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-border/70 px-4 pt-3 pb-2">
               <AnimatePresence>
                 {attachments.map((att) => (
                   <AttachmentChip
@@ -247,7 +247,7 @@ export function ChatInput({
                   />
                 ))}
               </AnimatePresence>
-              <span className="text-[11px] text-muted-foreground ml-1">
+              <span className="text-[11px] text-muted-foreground ml-1 select-none">
                 {attachments.length}/{MAX_FILES}
               </span>
             </div>
@@ -256,16 +256,16 @@ export function ChatInput({
           {/* Textarea Area */}
           <div className="relative flex items-end">
             {/* Paperclip Attach Button */}
-            <div className="pb-2.5 pl-2.5">
+            <div className="pb-2 pl-2.5">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isStreaming || disabled || attachments.length >= MAX_FILES}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent"
                 aria-label="Attach documents"
                 title="Attach documents (.pdf, .txt, .md, .json, .docx, .png, .jpg)"
               >
-                <Paperclip className="h-4.5 w-4.5" />
+                <Paperclip className="h-4 w-4" />
               </button>
             </div>
 
@@ -282,45 +282,41 @@ export function ChatInput({
                   ? 'AI is generating compliance analysis...'
                   : attachments.length > 0
                   ? 'Add instructions for attached files, or press Enter to review...'
-                  : 'Ask about compliance policies, regulations, or draft a disclosure... (Enter to send)'
+                  : 'Message Compliance AI... (Enter to send)'
               }
-              className="min-h-[46px] max-h-[150px] w-full resize-none bg-transparent px-3 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-60 leading-relaxed"
+              className="min-h-[48px] max-h-[150px] w-full resize-none bg-transparent px-3 py-3 pr-12 text-[15px] text-foreground placeholder:text-muted-foreground/80 focus:outline-none disabled:opacity-60 leading-relaxed"
             />
 
             {/* Right Action: Send or Stop Button */}
-            <div className="pb-2.5 pr-2.5">
+            <div className="pb-2 pr-2.5">
               {isStreaming ? (
-                <Button
+                <button
                   type="button"
-                  size="icon-sm"
                   onClick={onStopStreaming}
-                  className="h-9 w-9 rounded-xl bg-primary text-primary-foreground shadow-2xs transition hover:bg-primary/90"
+                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label="Stop generation"
                 >
                   <Square className="h-3.5 w-3.5 fill-current" />
-                </Button>
+                </button>
               ) : (
-                <Button
+                <button
                   type="button"
-                  size="icon-sm"
                   disabled={!canSend}
                   onClick={handleSend}
-                  className="h-9 w-9 rounded-xl bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600"
+                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-emerald-600 text-white shadow-2xs transition hover:bg-emerald-500 disabled:opacity-35 disabled:hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label="Send message"
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
+                  <Send className="h-4 w-4 ml-0.5" />
+                </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Footer Guidance */}
-        <div className="mt-1.5 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
-          <span>Max 5 files (10 MB each) · PDF, DOCX, TXT, JSON, MD, PNG, JPG</span>
-          <span className="hidden sm:inline-flex items-center gap-1">
-            <span>Shift + Enter for new line</span>
-          </span>
+        {/* Small muted hint text below */}
+        <div className="mt-2 flex items-center justify-between px-2 text-[11px] text-muted-foreground select-none">
+          <span>Compliance AI can make mistakes. Verify regulatory sources.</span>
+          <span className="hidden sm:inline">Shift + Enter for new line</span>
         </div>
       </div>
     </div>

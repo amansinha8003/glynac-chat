@@ -16,23 +16,23 @@ export function ChatHeader({ thread, onOpenMobileMenu }: ChatHeaderProps) {
   const toggleSearch = useSearchStore((state) => state.toggleSearch);
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/70 px-4 backdrop-blur-md z-20">
-      <div className="flex items-center gap-2.5 overflow-hidden min-w-0 pr-2">
+    <header className="flex h-13 shrink-0 items-center justify-between border-b border-border/80 bg-background/95 px-4 backdrop-blur-md z-20">
+      <div className="flex items-center gap-2 overflow-hidden min-w-0 pr-2">
         {onOpenMobileMenu && (
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={onOpenMobileMenu}
-            className="h-9 w-9 text-muted-foreground hover:text-foreground md:hidden shrink-0"
+            className="h-8 w-8 text-muted-foreground hover:bg-surface hover:text-foreground md:hidden shrink-0 rounded-lg"
             aria-label="Open sidebar"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
           </Button>
         )}
 
         <div className="flex items-center gap-2 overflow-hidden min-w-0">
           <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
-          <h1 className="truncate text-sm font-semibold tracking-tight text-foreground max-w-[180px] sm:max-w-xs md:max-w-md">
+          <h1 className="truncate text-sm font-medium tracking-tight text-foreground max-w-[180px] sm:max-w-xs md:max-w-md">
             {thread?.title || 'No Active Thread'}
           </h1>
           {thread?.pinned && (
@@ -43,13 +43,13 @@ export function ChatHeader({ thread, onOpenMobileMenu }: ChatHeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <Button
           type="button"
           variant="ghost"
           size="icon-xs"
           onClick={toggleSearch}
-          className="h-8 w-8 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className="h-8 w-8 text-muted-foreground hover:bg-surface hover:text-foreground transition-colors duration-150 rounded-lg"
           aria-label="Search messages"
           title="Search messages (Ctrl+F)"
         >
@@ -60,8 +60,8 @@ export function ChatHeader({ thread, onOpenMobileMenu }: ChatHeaderProps) {
 
         <ThemeToggle />
 
-        <span className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-2xs lg:inline-flex">
-          <Shield className="h-3 w-3 text-emerald-500" />
+        <span className="hidden items-center gap-1.5 rounded-full border border-border/80 bg-surface/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground lg:inline-flex select-none">
+          <Shield className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
           SEC & FINRA Guardrails
         </span>
       </div>
