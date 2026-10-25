@@ -10,6 +10,14 @@ export const MOCK_CITATIONS: Citation[] = [
     docUrl: 'https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210',
   },
   {
+    id: 'finra-2210-d',
+    label: 'FINRA Rule 2210(d)',
+    source: 'FINRA Manual § 2210(d)(1) Content Standards',
+    excerpt:
+      'All member communications must be based on principles of fair dealing and good faith, must be fair and balanced, and must provide a sound basis for evaluating the facts in regard to any particular security or type of security, industry, or service. No member may make any false, exaggerated, unwarranted, promissory or misleading statement or claim.',
+    docUrl: 'https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210',
+  },
+  {
     id: 'sec-17a-4',
     label: 'SEC Rule 17a-4(f)',
     source: '17 CFR § 240.17a-4 Electronic Recordkeeping',
